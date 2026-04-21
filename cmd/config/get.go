@@ -3,76 +3,95 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/cicbyte/answer-cli/internal/common"
-	configlogic "github.com/cicbyte/answer-cli/internal/logic/config"
 	"github.com/spf13/cobra"
 )
 
-var (
-	getShowFlag bool
-	getKeyStyle   = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("15"))
-	getValueStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
-	getMaskStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
-	getDescStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
-	getTypeStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("6"))
-	getHintStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Italic(true)
-)
+var getShowFlag bool
 
-func getGetCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "get <key>",
-		Short: "查看配置项的值",
-		Long: `查看指定配置项的当前值。
+var getCmd = &cobra.Command{
+	Use:   "get <key>",
+	Short: "查看配置项的值",
+	Long: `查看指定配置项的当前值。
 
-敏感字段（如 api_key）默认显示为 ******，使用 --show 查看明文。
+敏感字段（如 token、api_key）默认显示为脱敏值，使用 --show 查看明文。
 
 示例:
+  answer-cli config get server.base_url
   answer-cli config get ai.model
-  answer-cli config get ai.api_key
-  answer-cli config get ai.api_key --show`,
-		Args: cobra.ExactArgs(1),
-		Run:  runGet,
-	}
+  answer-cli config get server.token
+  answer-cli config get server.token --show`,
+	Args: cobra.ExactArgs(1),
+	Run:  runGet,
 }
 
 func init() {
-	getGetCommand().Flags().BoolVar(&getShowFlag, "show", false, "显示敏感字段的明文值")
+	getCmd.Flags().BoolVar(&getShowFlag, "show", false, "显示敏感字段的明文值")
 }
 
 func runGet(cmd *cobra.Command, args []string) {
-	appConfig := common.GetAppConfig()
 	key := args[0]
 
-	processor := configlogic.NewGetProcessor(appConfig)
-	result, err := processor.Execute(key)
-	if err != nil {
-		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Render(fmt.Sprintf("  %v", err)))
+	value, ok, sensitive := getConfigValue(key)
+	if !ok {
+		fmt.Printf("错误: 未知配置项 '%s'\n", key)
+		fmt.Println("使用 'answer-cli config list' 查看所有配置项")
 		os.Exit(1)
 	}
 
-	item := result.Item
-	value := result.Value
-
-	fmt.Println()
-	fmt.Printf("  %s %s\n", getKeyStyle.Render(item.Key), getTypeStyle.Render(fmt.Sprintf("<%s>", item.Type)))
-	fmt.Printf("  %s\n", getDescStyle.Render(item.Desc))
-	fmt.Println()
-
-	if item.Sensitive && !getShowFlag {
-		if value != "" {
-			fmt.Printf("  值: %s\n", getMaskStyle.Render("******"))
-			fmt.Println(getHintStyle.Render("  使用 --show 查看明文"))
-		} else {
-			fmt.Printf("  值: %s\n", getHintStyle.Render("(未设置)"))
-		}
-	} else {
-		if value != "" {
-			fmt.Printf("  值: %s\n", getValueStyle.Render(value))
-		} else {
-			fmt.Printf("  值: %s\n", getHintStyle.Render("(未设置)"))
-		}
+	if value == "" {
+		fmt.Printf("%s: (未设置)\n", key)
+		return
 	}
-	fmt.Println()
+
+	if sensitive && !getShowFlag {
+		fmt.Printf("%s: %s\n", key, maskValue(value))
+		fmt.Println("使用 --show 查看明文")
+		return
+	}
+
+	fmt.Printf("%s: %s\n", key, value)
+}
+
+// getConfigValue 根据配置项键获取值。
+// 返回 (值, 是否存在, 是否敏感)。
+func getConfigValue(key string) (string, bool, bool) {
+	appConfig := common.GetAppConfig()
+
+	switch key {
+	case "server.base_url":
+		return appConfig.Server.BaseURL, true, false
+	case "server.token":
+		return appConfig.Server.Token, true, true
+	case "ai.provider":
+		return appConfig.AI.Provider, true, false
+	case "ai.base_url":
+		return appConfig.AI.BaseURL, true, false
+	case "ai.model":
+		return appConfig.AI.Model, true, false
+	case "ai.api_key":
+		return appConfig.AI.ApiKey, true, true
+	case "ai.max_tokens":
+		return strconv.Itoa(appConfig.AI.MaxTokens), true, false
+	case "ai.temperature":
+		return fmt.Sprintf("%.2f", appConfig.AI.Temperature), true, false
+	case "ai.timeout":
+		return strconv.Itoa(appConfig.AI.Timeout), true, false
+	case "output.format":
+		return appConfig.Output.Format, true, false
+	case "log.level":
+		return appConfig.Log.Level, true, false
+	case "log.max_size":
+		return strconv.Itoa(appConfig.Log.MaxSize), true, false
+	case "log.max_backups":
+		return strconv.Itoa(appConfig.Log.MaxBackups), true, false
+	case "log.max_age":
+		return strconv.Itoa(appConfig.Log.MaxAge), true, false
+	case "log.compress":
+		return strconv.FormatBool(appConfig.Log.Compress), true, false
+	default:
+		return "", false, false
+	}
 }

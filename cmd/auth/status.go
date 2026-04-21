@@ -3,74 +3,80 @@ package auth
 import (
 	"context"
 	"fmt"
+	"os"
 
+	"github.com/cicbyte/answer-cli/internal/client"
 	"github.com/cicbyte/answer-cli/internal/common"
-	authlogic "github.com/cicbyte/answer-cli/internal/logic/auth"
-	"github.com/charmbracelet/lipgloss"
+	"github.com/cicbyte/answer-cli/internal/output"
 	"github.com/spf13/cobra"
 )
 
-func getStatusCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "status",
-		Short: "查看认证状态",
-		Long: `查看当前认证状态。
-
-显示当前用户信息和服务器连接状态。
+var statusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "查看认证状态",
+	Long: `查看当前认证状态和用户信息。
 
 示例:
   answer-cli auth status`,
-			Run: runStatus,
-	}
+	Run: runStatus,
 }
 
 func runStatus(cmd *cobra.Command, args []string) {
-	processor := authlogic.NewStatusProcessor(common.GetAppConfig())
-	result, err := processor.Execute(context.Background())
+	appConfig := common.GetAppConfig()
+
+	if appConfig.GetServerURL() == "" {
+		fmt.Println("未配置服务器。请先运行 'answer-cli auth login' 登录。")
+		return
+	}
+
+	fmt.Printf("服务器: %s\n", appConfig.GetServerURL())
+
+	if appConfig.GetServerToken() == "" {
+		fmt.Println("状态: 未认证")
+		fmt.Println("\n请运行 'answer-cli auth login' 进行认证。")
+		return
+	}
+
+	// 创建客户端查询当前用户
+	c := client.NewClient(&client.Config{
+		BaseURL: appConfig.GetServerURL(),
+		Token:   appConfig.GetServerToken(),
+	})
+
+	authService := client.NewAuthService(c)
+	user, err := authService.GetCurrentUser(context.Background())
 	if err != nil {
-		fmt.Printf("❌ 错误: %v\n", err)
-		return
+		fmt.Println("状态: 认证失败")
+		fmt.Printf("错误: %v\n", err)
+		fmt.Println("\n请运行 'answer-cli auth login' 重新认证。")
+		os.Exit(1)
 	}
 
+	fmt.Println("状态: 已认证")
 	fmt.Println()
-	fmt.Println(lipgloss.NewStyle().Bold(true).Render("认证状态"))
-	fmt.Println()
 
-	if result.ServerName == "" {
-		fmt.Println("  未配置服务器。")
-		fmt.Println("\n  请先运行 'answer-cli auth login' 登录。")
-		return
+	// 以表格形式显示用户信息
+	headers := []string{"字段", "值"}
+	rows := [][]string{
+		{"用户名", user.Username},
+		{"显示名", user.DisplayName},
+		{"邮箱", user.EMail},
+		{"等级", fmt.Sprintf("%d", user.Rank)},
+		{"提问数", fmt.Sprintf("%d", user.QuestionCount)},
+		{"回答数", fmt.Sprintf("%d", user.AnswerCount)},
+		{"关注数", fmt.Sprintf("%d", user.FollowCount)},
+		{"管理员", fmt.Sprintf("%v", user.IsAdmin)},
 	}
 
-	fmt.Printf("  服务器: %s\n", lipgloss.NewStyle().Foreground(lipgloss.Color("12")).Render(result.ServerName))
-	fmt.Printf("  地址: %s\n", result.ServerURL)
-
-	if !result.Authenticated {
-		fmt.Println()
-		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("11")).Render("  状态: 未认证"))
-		fmt.Println("\n  请运行 'answer-cli auth login' 进行认证。")
-		return
+	if user.Bio != "" {
+		rows = append(rows, []string{"简介", output.Truncate(user.Bio, 60)})
+	}
+	if user.Website != "" {
+		rows = append(rows, []string{"网站", user.Website})
+	}
+	if user.Location != "" {
+		rows = append(rows, []string{"位置", user.Location})
 	}
 
-	if result.AuthError != nil {
-		fmt.Println()
-		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Render("  状态: 认证失败"))
-		fmt.Printf("  错误: %v\n", result.AuthError)
-		fmt.Println("\n  请运行 'answer-cli auth login' 重新认证。")
-		return
-	}
-
-	fmt.Println()
-	fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Render("  状态: 已认证 ✓"))
-	fmt.Println()
-	if result.User != nil {
-		fmt.Printf("  用户名: %s\n", result.User.Username)
-		if result.User.Nickname != "" {
-			fmt.Printf("  昵称: %s\n", result.User.Nickname)
-		}
-		if result.User.Email != "" {
-			fmt.Printf("  邮箱: %s\n", result.User.Email)
-		}
-		fmt.Printf("  角色: %s\n", result.User.Role)
-	}
+	output.PrintTable(headers, rows)
 }

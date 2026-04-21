@@ -1,4 +1,3 @@
-// Package client provides HTTP client for Memos API
 package client
 
 import (
@@ -13,28 +12,33 @@ import (
 	"go.uber.org/zap"
 )
 
-// Client Memos API 客户端
 type Client struct {
-	client  *resty.Client
-	baseURL string
-	token   string
+	client        *resty.Client
+	baseURL       string
+	token         string
+	Comment       *CommentService
+	Tag           *TagService
+	Search        *SearchService
+	Notification  *NotificationService
+	User          *UserService
+	Vote          *VoteService
+	Question      *QuestionService
+	Answer        *AnswerService
 }
 
-// Config 客户端配置
 type Config struct {
 	BaseURL string
 	Token   string
 	Timeout time.Duration
 }
 
-// NewClient 创建新的 API 客户端
 func NewClient(cfg *Config) *Client {
 	if cfg.Timeout == 0 {
 		cfg.Timeout = 30 * time.Second
 	}
 
 	client := resty.New().
-		SetBaseURL(cfg.BaseURL+"/api/v1").
+		SetBaseURL(cfg.BaseURL + "/answer/api/v1").
 		SetTimeout(cfg.Timeout).
 		SetRetryCount(3).
 		SetRetryWaitTime(500 * time.Millisecond).
@@ -42,12 +46,10 @@ func NewClient(cfg *Config) *Client {
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json")
 
-	// 设置认证
 	if cfg.Token != "" {
-		client.SetAuthToken(cfg.Token)
+		client.SetHeader("Authorization", cfg.Token)
 	}
 
-	// 添加请求日志
 	client.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
 		log.Debug("API request",
 			zap.String("method", req.Method),
@@ -56,7 +58,6 @@ func NewClient(cfg *Config) *Client {
 		return nil
 	})
 
-	// 添加响应日志
 	client.OnAfterResponse(func(c *resty.Client, resp *resty.Response) error {
 		log.Debug("API response",
 			zap.Int("status", resp.StatusCode()),
@@ -66,137 +67,132 @@ func NewClient(cfg *Config) *Client {
 		return nil
 	})
 
-	return &Client{
+	c := &Client{
 		client:  client,
 		baseURL: cfg.BaseURL,
 		token:   cfg.Token,
 	}
+	c.Comment = NewCommentService(c)
+	c.Tag = NewTagService(c)
+	c.Search = NewSearchService(c)
+	c.Notification = NewNotificationService(c)
+	c.User = NewUserService(c)
+	c.Vote = NewVoteService(c)
+	c.Question = NewQuestionService(c)
+	c.Answer = NewAnswerService(c)
+	return c
 }
 
-// SetToken 设置认证令牌
 func (c *Client) SetToken(token string) {
 	c.token = token
-	c.client.SetAuthToken(token)
+	c.client.SetHeader("Authorization", token)
 }
 
-// GetToken 获取当前令牌
 func (c *Client) GetToken() string {
 	return c.token
 }
 
-// Get 执行 GET 请求
-func (c *Client) Get(ctx context.Context, path string, result interface{}) error {
-	resp, err := c.client.R().
-		SetContext(ctx).
-		SetResult(result).
-		Get(path)
-
-	return c.handleError(resp, err)
+// RespBody Answer API 统一响应结构
+type RespBody struct {
+	Code    int    `json:"code"`
+	Reason  string `json:"reason"`
+	Message string `json:"msg"`
+	Data    json.RawMessage `json:"data"`
 }
 
-// GetWithQuery 执行带查询参数的 GET 请求
-func (c *Client) GetWithQuery(ctx context.Context, path string, params map[string]string, result interface{}) error {
-	resp, err := c.client.R().
-		SetContext(ctx).
-		SetQueryParams(params).
-		SetResult(result).
-		Get(path)
-
-	return c.handleError(resp, err)
-}
-
-// Post 执行 POST 请求
-func (c *Client) Post(ctx context.Context, path string, body interface{}, result interface{}) error {
-	resp, err := c.client.R().
-		SetContext(ctx).
-		SetHeader("Content-Type", "application/json").
-		SetBody(body).
-		SetResult(result).
-		Post(path)
-
-	return c.handleError(resp, err)
-}
-
-// Patch 执行 PATCH 请求
-func (c *Client) Patch(ctx context.Context, path string, body interface{}, result interface{}) error {
-	resp, err := c.client.R().
-		SetContext(ctx).
-		SetBody(body).
-		SetResult(result).
-		Patch(path)
-
-	return c.handleError(resp, err)
-}
-
-// Delete 执行 DELETE 请求
-func (c *Client) Delete(ctx context.Context, path string) error {
-	resp, err := c.client.R().
-		SetContext(ctx).
-		Delete(path)
-
-	return c.handleError(resp, err)
-}
-
-// handleError 统一处理 API 错误
-func (c *Client) handleError(resp *resty.Response, err error) error {
+// unwrap 解包 RespBody，将 data 字段反序列化到 result
+func unwrap(resp *resty.Response, err error, result interface{}) error {
 	if err != nil {
 		log.Error("API request failed", zap.Error(err))
-		return fmt.Errorf("API request failed: %w", err)
+		return fmt.Errorf("request failed: %w", err)
 	}
 
-	if resp.IsError() {
-		var apiErr APIError
-		if jsonErr := json.Unmarshal(resp.Body(), &apiErr); jsonErr == nil && apiErr.Message != "" {
-			log.Error("API error response",
-				zap.Int("status", resp.StatusCode()),
-				zap.String("code", apiErr.Code),
-				zap.String("message", apiErr.Message),
-			)
-			return &apiErr
-		}
+	var body RespBody
+	if jsonErr := json.Unmarshal(resp.Body(), &body); jsonErr != nil {
+		return fmt.Errorf("failed to parse response: %w", jsonErr)
+	}
 
-		log.Error("HTTP error response",
-			zap.Int("status", resp.StatusCode()),
-			zap.String("body", string(resp.Body())),
-		)
-		return fmt.Errorf("HTTP error: %d - %s", resp.StatusCode(), resp.Status())
+	if body.Code != 0 && body.Code != 200 {
+		msg := body.Message
+		if msg == "" {
+			msg = body.Reason
+		}
+		return &APIError{Code: body.Code, Message: msg}
+	}
+
+	if result != nil && len(body.Data) > 0 {
+		if jsonErr := json.Unmarshal(body.Data, result); jsonErr != nil {
+			return fmt.Errorf("failed to parse response data: %w", jsonErr)
+		}
 	}
 
 	return nil
 }
 
-// APIError Memos API 错误响应
+// GetJSON GET 请求并解包 RespBody
+func (c *Client) GetJSON(ctx context.Context, path string, params map[string]string, result interface{}) error {
+	req := c.client.R().SetContext(ctx)
+	if params != nil {
+		req.SetQueryParams(params)
+	}
+	resp, err := req.Get(path)
+	return unwrap(resp, err, result)
+}
+
+// PostJSON POST 请求并解包 RespBody
+func (c *Client) PostJSON(ctx context.Context, path string, body interface{}, result interface{}) error {
+	req := c.client.R().SetContext(ctx)
+	if body != nil {
+		req.SetBody(body)
+	}
+	resp, err := req.Post(path)
+	return unwrap(resp, err, result)
+}
+
+// PutJSON PUT 请求并解包 RespBody
+func (c *Client) PutJSON(ctx context.Context, path string, body interface{}, result interface{}) error {
+	req := c.client.R().SetContext(ctx)
+	if body != nil {
+		req.SetBody(body)
+	}
+	resp, err := req.Put(path)
+	return unwrap(resp, err, result)
+}
+
+// DeleteJSON DELETE 请求并解包 RespBody
+func (c *Client) DeleteJSON(ctx context.Context, path string, body interface{}) error {
+	req := c.client.R().SetContext(ctx)
+	if body != nil {
+		req.SetBody(body)
+	}
+	resp, err := req.Delete(path)
+	return unwrap(resp, err, nil)
+}
+
+// APIError Answer API 错误
 type APIError struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
-	Details []struct {
-		Type     string `json:"type"`
-		Field    string `json:"field"`
-		Description string `json:"description"`
-	} `json:"details"`
+	Code    int
+	Message string
 }
 
 func (e *APIError) Error() string {
-	return fmt.Sprintf("API error [%s]: %s", e.Code, e.Message)
+	return fmt.Sprintf("API error [%d]: %s", e.Code, e.Message)
 }
 
-// IsNotFoundError 检查是否为未找到错误
-func IsNotFoundError(err error) bool {
-	if apiErr, ok := err.(*APIError); ok {
-		return apiErr.Code == "NOT_FOUND" || apiErr.Code == "404"
-	}
-	return false
-}
-
-// IsUnauthorizedError 检查是否为未授权错误
 func IsUnauthorizedError(err error) bool {
 	if apiErr, ok := err.(*APIError); ok {
-		return apiErr.Code == "UNAUTHORIZED" || apiErr.Code == "401"
+		return apiErr.Code == 401
 	}
 	return false
 }
 
-// IsNetworkError 检查是否为网络错误
+func IsNotFoundError(err error) bool {
+	if apiErr, ok := err.(*APIError); ok {
+		return apiErr.Code == 404
+	}
+	return false
+}
+
 func IsNetworkError(err error) bool {
 	return err != nil && (err == http.ErrHandlerTimeout || err == context.DeadlineExceeded)
 }

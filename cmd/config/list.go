@@ -2,90 +2,89 @@ package config
 
 import (
 	"fmt"
-	"strings"
+	"strconv"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/cicbyte/answer-cli/internal/common"
-	configlogic "github.com/cicbyte/answer-cli/internal/logic/config"
+	"github.com/cicbyte/answer-cli/internal/output"
 	"github.com/spf13/cobra"
 )
 
-var (
-	headerStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("12")).Padding(0, 1)
-	keyStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Padding(0, 1)
-	valueStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Padding(0, 1)
-	descStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Padding(0, 1)
-	maskStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Padding(0, 1)
-	emptyStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Padding(0, 1)
+var listCmd = &cobra.Command{
+	Use:   "list",
+	Short: "列出所有配置项及当前值",
+	Long: `列出所有配置项及当前值。敏感字段（如 token、api_key）会显示脱敏后的值。
 
-	tableBorder = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("8")).Padding(0, 1)
-)
-
-func getListCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "list",
-		Short: "列出所有配置项及当前值",
-		Run:   runList,
-	}
+示例:
+  answer-cli config list`,
+	Run: runList,
 }
 
 func runList(cmd *cobra.Command, args []string) {
 	appConfig := common.GetAppConfig()
-	items := configlogic.AllConfigItems()
 
-	keyCol := 22
-	valueCol := 30
-	descCol := 36
-
-	header := lipgloss.JoinHorizontal(lipgloss.Top,
-		headerStyle.Width(keyCol).Render("KEY"),
-		headerStyle.Width(valueCol).Render("VALUE"),
-		headerStyle.Render("DESCRIPTION"),
-	)
-
-	totalWidth := keyCol + valueCol + descCol + 3
-	sep := lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Width(totalWidth).Render(strings.Repeat("─", totalWidth))
-
-	rows := make([]string, 0, len(items))
-	currentSection := ""
-	for _, item := range items {
-		if item.Section != currentSection {
-			currentSection = item.Section
-			sectionRow := lipgloss.NewStyle().
-				Foreground(lipgloss.Color("12")).Bold(true).
-				Width(totalWidth).
-				Render(fmt.Sprintf(" [%s]", currentSection))
-			rows = append(rows, sectionRow)
-		}
-
-		raw := configlogic.GetConfigValue(appConfig, item.Key)
-		var displayVal string
-		switch {
-		case raw == "":
-			displayVal = emptyStyle.Width(valueCol).Render("(未设置)")
-		case item.Sensitive:
-			displayVal = maskStyle.Width(valueCol).Render("******")
-		default:
-			displayVal = valueStyle.Width(valueCol).Render(raw)
-		}
-
-		desc := descStyle.Width(descCol).Render(item.Desc)
-
-		row := lipgloss.JoinHorizontal(lipgloss.Top,
-			keyStyle.Width(keyCol).Render(item.Key),
-			displayVal,
-			desc,
-		)
-		rows = append(rows, row)
+	// 构建配置项列表
+	type configEntry struct {
+		key        string
+		section    string
+		value      string
+		sensitive  bool
 	}
 
-	table := lipgloss.JoinVertical(lipgloss.Left,
-		header,
-		sep,
-		lipgloss.JoinVertical(lipgloss.Left, rows...),
-	)
+	entries := []configEntry{
+		// Server
+		{key: "server.base_url", section: "Server", value: appConfig.Server.BaseURL},
+		{key: "server.token", section: "Server", value: appConfig.Server.Token, sensitive: true},
+		// AI
+		{key: "ai.provider", section: "AI", value: appConfig.AI.Provider},
+		{key: "ai.base_url", section: "AI", value: appConfig.AI.BaseURL},
+		{key: "ai.model", section: "AI", value: appConfig.AI.Model},
+		{key: "ai.api_key", section: "AI", value: appConfig.AI.ApiKey, sensitive: true},
+		{key: "ai.max_tokens", section: "AI", value: strconv.Itoa(appConfig.AI.MaxTokens)},
+		{key: "ai.temperature", section: "AI", value: fmt.Sprintf("%.2f", appConfig.AI.Temperature)},
+		{key: "ai.timeout", section: "AI", value: strconv.Itoa(appConfig.AI.Timeout)},
+		// Output
+		{key: "output.format", section: "Output", value: appConfig.Output.Format},
+		// Log
+		{key: "log.level", section: "Log", value: appConfig.Log.Level},
+		{key: "log.max_size", section: "Log", value: strconv.Itoa(appConfig.Log.MaxSize)},
+		{key: "log.max_backups", section: "Log", value: strconv.Itoa(appConfig.Log.MaxBackups)},
+		{key: "log.max_age", section: "Log", value: strconv.Itoa(appConfig.Log.MaxAge)},
+		{key: "log.compress", section: "Log", value: strconv.FormatBool(appConfig.Log.Compress)},
+	}
 
-	fmt.Println()
-	fmt.Println(tableBorder.Render(table))
-	fmt.Println()
+	// 显示
+	headers := []string{"KEY", "VALUE"}
+	rows := make([][]string, 0, len(entries))
+	currentSection := ""
+
+	for _, e := range entries {
+		// 插入分组标题行
+		if e.section != currentSection {
+			currentSection = e.section
+			rows = append(rows, []string{fmt.Sprintf("[%s]", currentSection), ""})
+		}
+
+		displayVal := e.value
+		if e.sensitive {
+			displayVal = maskValue(e.value)
+		}
+		if displayVal == "" {
+			displayVal = "(未设置)"
+		}
+
+		rows = append(rows, []string{e.key, displayVal})
+	}
+
+	output.PrintTable(headers, rows)
+}
+
+func maskValue(value string) string {
+	if value == "" {
+		return ""
+	}
+	runes := []rune(value)
+	if len(runes) <= 8 {
+		return "******"
+	}
+	return string(runes[:4]) + "..." + string(runes[len(runes)-4:])
 }

@@ -1,34 +1,13 @@
 package log
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/cicbyte/answer-cli/internal/common"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"gorm.io/gorm/logger"
 )
 
 var Logger *zap.Logger
-
-type gormLoggerAdapter struct{}
-
-func (g *gormLoggerAdapter) Printf(format string, v ...interface{}) {
-	Logger.Info(fmt.Sprintf(format, v...))
-}
-
-func GetGormLogger() logger.Interface {
-	return logger.New(
-		&gormLoggerAdapter{},
-		logger.Config{
-			SlowThreshold: time.Second,
-			LogLevel:      logger.Warn,
-			Colorful:      false,
-		},
-	)
-}
 
 func Init(logPath string) error {
 	encoderConfig := zapcore.EncoderConfig{
@@ -46,7 +25,6 @@ func Init(logPath string) error {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	// 添加动态日志级别配置
 	level := zap.NewAtomicLevel()
 	switch common.GetAppConfig().Log.Level {
 	case "debug":
@@ -65,9 +43,9 @@ func Init(logPath string) error {
 		zapcore.NewJSONEncoder(encoderConfig),
 		zapcore.AddSync(&lumberjack.Logger{
 			Filename:   logPath,
-			MaxSize:    common.GetAppConfig().Log.MaxSize, // MB
+			MaxSize:    common.GetAppConfig().Log.MaxSize,
 			MaxBackups: common.GetAppConfig().Log.MaxBackups,
-			MaxAge:     common.GetAppConfig().Log.MaxAge, // days
+			MaxAge:     common.GetAppConfig().Log.MaxAge,
 			Compress:   common.GetAppConfig().Log.Compress,
 		}),
 		level,
@@ -77,22 +55,8 @@ func Init(logPath string) error {
 	return nil
 }
 
-func Info(msg string, fields ...zap.Field) {
-	Logger.Info(msg, fields...)
-}
-
-func Warn(msg string, fields ...zap.Field) {
-	Logger.Warn(msg, fields...)
-}
-
-func Error(msg string, fields ...zap.Field) {
-	Logger.Error(msg, fields...)
-}
-
-func Debug(msg string, fields ...zap.Field) {
-	Logger.Debug(msg, fields...)
-}
-
-func Fatal(msg string, fields ...zap.Field) {
-	Logger.Fatal(msg, fields...)
-}
+func Info(msg string, fields ...zap.Field)  { Logger.Info(msg, fields...) }
+func Warn(msg string, fields ...zap.Field)  { Logger.Warn(msg, fields...) }
+func Error(msg string, fields ...zap.Field) { Logger.Error(msg, fields...) }
+func Debug(msg string, fields ...zap.Field) { Logger.Debug(msg, fields...) }
+func Fatal(msg string, fields ...zap.Field) { Logger.Fatal(msg, fields...) }

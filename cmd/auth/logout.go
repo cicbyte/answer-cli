@@ -1,71 +1,58 @@
 package auth
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
+	"github.com/cicbyte/answer-cli/internal/client"
 	"github.com/cicbyte/answer-cli/internal/common"
-	authlogic "github.com/cicbyte/answer-cli/internal/logic/auth"
+	"github.com/cicbyte/answer-cli/internal/log"
+	"github.com/cicbyte/answer-cli/internal/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
-var (
-	authLogoutServer string
-	authLogoutForce  bool
-)
-
-func getLogoutCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "logout",
-		Short: "登出 Memos 服务器",
-		Long: `登出 Memos 服务器，清除已保存的认证令牌。
+var logoutCmd = &cobra.Command{
+	Use:   "logout",
+	Short: "登出 Answer 服务器",
+	Long: `登出 Apache Answer 服务器，清除本地已保存的认证令牌。
 
 示例:
-  answer-cli auth logout
-  answer-cli auth logout --server=my-server`,
-		Run: runLogout,
-	}
-
-	cmd.Flags().StringVarP(&authLogoutServer, "server", "s", "", "指定要登出的服务器名称")
-	cmd.Flags().BoolVarP(&authLogoutForce, "force", "f", false, "跳过确认直接登出")
-
-	return cmd
+  answer-cli auth logout`,
+	Run: runLogout,
 }
 
 func runLogout(cmd *cobra.Command, args []string) {
-	config := &authlogic.LogoutConfig{
-		ServerName: authLogoutServer,
+	appConfig := common.GetAppConfig()
+
+	if appConfig.GetServerURL() == "" {
+		fmt.Println("错误: 未配置服务器地址，请先登录")
+		os.Exit(1)
 	}
 
-	processor := authlogic.NewLogoutProcessor(config, common.GetAppConfig())
-
-	if !authLogoutForce {
-		var serverName string
-		if authLogoutServer != "" {
-			serverName = authLogoutServer
-		} else if s := common.GetAppConfig().GetDefaultServer(); s != nil {
-			serverName = s.Name
-		}
-		if serverName != "" {
-			fmt.Printf("确认从 '%s' 登出？[y/N]: ", serverName)
-			reader := bufio.NewReader(os.Stdin)
-			input, _ := reader.ReadString('\n')
-			input = strings.TrimSpace(strings.ToLower(input))
-			if input != "y" && input != "yes" {
-				fmt.Println("已取消。")
-				return
-			}
-		}
-	}
-
-	serverName, err := processor.Execute(context.Background())
-	if err != nil {
-		fmt.Printf("❌ 错误: %v\n", err)
+	if appConfig.GetServerToken() == "" {
+		fmt.Println("当前未认证，无需登出")
 		return
 	}
 
-	fmt.Printf("✓ 已从 '%s' 登出\n", serverName)
+	// 创建客户端调用登出 API
+	c := client.NewClient(&client.Config{
+		BaseURL: appConfig.GetServerURL(),
+		Token:   appConfig.GetServerToken(),
+	})
+
+	authService := client.NewAuthService(c)
+	err := authService.Logout(context.Background())
+	if err != nil {
+		// 登出 API 调用失败时仍然清除本地 token
+		log.Warn("登出 API 调用失败，仍清除本地令牌", zap.Error(err))
+	}
+
+	// 清除本地 token
+	appConfig.Server.Token = ""
+	utils.ConfigInstance.SaveConfig(appConfig)
+	common.SetAppConfig(appConfig)
+
+	fmt.Println("已登出")
 }
