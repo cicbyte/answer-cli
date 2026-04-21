@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cicbyte/memos-cli/internal/ai"
-	"github.com/cicbyte/memos-cli/internal/models"
-	syncpkg "github.com/cicbyte/memos-cli/internal/sync"
-	"github.com/cicbyte/memos-cli/internal/utils"
+	"github.com/cicbyte/answer-cli/internal/ai"
+	"github.com/cicbyte/answer-cli/internal/models"
+	syncpkg "github.com/cicbyte/answer-cli/internal/sync"
+	"github.com/cicbyte/answer-cli/internal/utils"
 )
 
 // Sync

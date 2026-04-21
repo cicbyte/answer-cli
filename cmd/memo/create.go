@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	memologic "github.com/cicbyte/memos-cli/internal/logic/memo"
+	"github.com/cicbyte/answer-cli/internal/common"
+	memologic "github.com/cicbyte/answer-cli/internal/logic/memo"
 	"github.com/spf13/cobra"
 )
 
@@ -27,11 +27,11 @@ func getCreateCommand() *cobra.Command {
 		Long: `创建新备忘录。
 
 示例:
-  memos-cli memo create --content="Hello, world!"
-  memos-cli memo create --content="Secret note" --visibility=private
-  memos-cli memo create --file=note.md
-  echo "内容" | memos-cli memo create
-  cat note.md | memos-cli memo create`,
+  answer-cli memo create --content="Hello, world!"
+  answer-cli memo create --content="Secret note" --visibility=private
+  answer-cli memo create --file=note.md
+  echo "内容" | answer-cli memo create
+  cat note.md | answer-cli memo create`,
 		Run: runCreate,
 	}
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cicbyte/memos-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/models"
 	"gorm.io/gorm"
 )
 

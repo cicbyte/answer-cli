@@ -5,7 +5,7 @@
 ## 用法
 
 ```bash
-memos-cli server [command]
+answer-cli server [command]
 ```
 
 ## 子命令
@@ -19,7 +19,7 @@ memos-cli server [command]
 
 ## 配置文件
 
-配置保存在 `~/.cicbyte/memos-cli/config/config.yaml`。也可以直接编辑此文件来管理配置。
+配置保存在 `~/.cicbyte/answer-cli/config/config.yaml`。也可以直接编辑此文件来管理配置。
 
 ---
 
@@ -28,7 +28,7 @@ memos-cli server [command]
 添加一个新的 Memos 服务器配置。
 
 ```bash
-memos-cli server add [flags]
+answer-cli server add [flags]
 ```
 
 ### 选项
@@ -44,13 +44,13 @@ memos-cli server add [flags]
 
 ```bash
 # 交互式添加
-memos-cli server add
+answer-cli server add
 
 # 通过参数添加
-memos-cli server add --name=work --url=https://memos.example.com --token=your-token
+answer-cli server add --name=work --url=https://memos.example.com --token=your-token
 
 # 添加并设为默认
-memos-cli server add --name=personal --url=https://memo.example.com --default
+answer-cli server add --name=personal --url=https://memo.example.com --default
 ```
 
 ---
@@ -60,13 +60,13 @@ memos-cli server add --name=personal --url=https://memo.example.com --default
 列出所有已配置的服务器。
 
 ```bash
-memos-cli server list
+answer-cli server list
 ```
 
 ### 示例
 
 ```bash
-memos-cli server list
+answer-cli server list
 ```
 
 ---
@@ -76,13 +76,13 @@ memos-cli server list
 设置默认服务器。默认服务器在执行 `sync`、`chat` 等命令时自动使用。
 
 ```bash
-memos-cli server default <server-name>
+answer-cli server default <server-name>
 ```
 
 ### 示例
 
 ```bash
-memos-cli server default personal
+answer-cli server default personal
 ```
 
 ---
@@ -92,7 +92,7 @@ memos-cli server default personal
 删除服务器配置。如果删除的是默认服务器，会自动将第一个剩余服务器设为默认。
 
 ```bash
-memos-cli server remove <server-name> [flags]
+answer-cli server remove <server-name> [flags]
 ```
 
 ### 选项
@@ -104,6 +104,6 @@ memos-cli server remove <server-name> [flags]
 ### 示例
 
 ```bash
-memos-cli server remove work
-memos-cli server remove personal --force
+answer-cli server remove work
+answer-cli server remove personal --force
 ```

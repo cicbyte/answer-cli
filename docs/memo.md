@@ -5,7 +5,7 @@
 ## 用法
 
 ```bash
-memos-cli memo [command]
+answer-cli memo [command]
 ```
 
 ## 子命令
@@ -23,7 +23,7 @@ memos-cli memo [command]
 
 ## memo list
 
-列出本地数据库中的备忘录。需要先执行 `memos-cli sync` 同步数据。
+列出本地数据库中的备忘录。需要先执行 `answer-cli sync` 同步数据。
 
 ---
 
@@ -32,7 +32,7 @@ memos-cli memo [command]
 显示本地备忘录的统计概览，包括总数、可见性分布、热门标签和最近备忘录。
 
 ```bash
-memos-cli memo stats
+answer-cli memo stats
 ```
 
 ### 输出示例
@@ -57,7 +57,7 @@ memos-cli memo stats
 ---
 
 ```bash
-memos-cli memo list [flags]
+answer-cli memo list [flags]
 ```
 
 ### 选项
@@ -77,26 +77,26 @@ memos-cli memo list [flags]
 
 ```bash
 # 列出最近 20 条备忘录
-memos-cli memo list
+answer-cli memo list
 
 # 查看第 2 页
-memos-cli memo list --page=2
+answer-cli memo list --page=2
 
 # 查看所有公开备忘录
-memos-cli memo list --visibility=public
+answer-cli memo list --visibility=public
 
 # 按标签过滤
-memos-cli memo list --tag=work
+answer-cli memo list --tag=work
 
 # 文本搜索
-memos-cli memo list --search="会议记录"
+answer-cli memo list --search="会议记录"
 
 # 按时间范围查询
-memos-cli memo list --from=2026-01-01
-memos-cli memo list --from=2025-07-01 --to=2025-12-31
+answer-cli memo list --from=2026-01-01
+answer-cli memo list --from=2025-07-01 --to=2025-12-31
 
 # 获取全部备忘录
-memos-cli memo list --page=all
+answer-cli memo list --page=all
 ```
 
 ---
@@ -106,7 +106,7 @@ memos-cli memo list --page=all
 查看备忘录的详细信息。
 
 ```bash
-memos-cli memo get <memo-id> [flags]
+answer-cli memo get <memo-id> [flags]
 ```
 
 ### 参数
@@ -125,10 +125,10 @@ memos-cli memo get <memo-id> [flags]
 
 ```bash
 # 查看详情
-memos-cli memo get 123
+answer-cli memo get 123
 
 # 仅获取原始内容（适合管道处理）
-memos-cli memo get 123 --raw
+answer-cli memo get 123 --raw
 ```
 
 ---
@@ -138,7 +138,7 @@ memos-cli memo get 123 --raw
 创建新备忘录。支持通过命令行参数、文件、管道或交互式输入提供内容。
 
 ```bash
-memos-cli memo create [flags]
+answer-cli memo create [flags]
 ```
 
 ### 选项
@@ -155,20 +155,20 @@ memos-cli memo create [flags]
 
 ```bash
 # 通过参数创建
-memos-cli memo create --content="Hello, world!"
+answer-cli memo create --content="Hello, world!"
 
 # 创建公开备忘录
-memos-cli memo create --content="公开笔记" --visibility=public
+answer-cli memo create --content="公开笔记" --visibility=public
 
 # 从文件创建
-memos-cli memo create --file=note.md
+answer-cli memo create --file=note.md
 
 # 管道输入
-echo "内容" | memos-cli memo create
-cat note.md | memos-cli memo create
+echo "内容" | answer-cli memo create
+cat note.md | answer-cli memo create
 
 # 交互式输入（不传参数时自动进入）
-memos-cli memo create
+answer-cli memo create
 ```
 
 ---
@@ -178,7 +178,7 @@ memos-cli memo create
 更新已有备忘录的内容、可见性、归档状态或置顶状态。
 
 ```bash
-memos-cli memo update <memo-id> [flags]
+answer-cli memo update <memo-id> [flags]
 ```
 
 ### 参数
@@ -202,19 +202,19 @@ memos-cli memo update <memo-id> [flags]
 
 ```bash
 # 修改内容
-memos-cli memo update 123 --content="新内容"
+answer-cli memo update 123 --content="新内容"
 
 # 交互式编辑内容
-memos-cli memo update 123 --content=-
+answer-cli memo update 123 --content=-
 
 # 改为公开
-memos-cli memo update 123 --visibility=public
+answer-cli memo update 123 --visibility=public
 
 # 归档
-memos-cli memo update 123 --archive
+answer-cli memo update 123 --archive
 
 # 置顶
-memos-cli memo update 123 --pin
+answer-cli memo update 123 --pin
 ```
 
 ---
@@ -224,7 +224,7 @@ memos-cli memo update 123 --pin
 删除备忘录。此操作不可撤销。
 
 ```bash
-memos-cli memo delete <memo-id> [flags]
+answer-cli memo delete <memo-id> [flags]
 ```
 
 ### 参数
@@ -243,8 +243,8 @@ memos-cli memo delete <memo-id> [flags]
 
 ```bash
 # 删除（有确认提示）
-memos-cli memo delete 123
+answer-cli memo delete 123
 
 # 强制删除（无确认）
-memos-cli memo delete 123 --force
+answer-cli memo delete 123 --force
 ```

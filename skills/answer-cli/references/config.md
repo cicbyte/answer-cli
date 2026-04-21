@@ -1,14 +1,14 @@
 # 配置参考
 
-配置文件路径：`~/.cicbyte/memos-cli/config/config.yaml`
+配置文件路径：`~/.cicbyte/answer-cli/config/config.yaml`
 
 ## config 命令
 
 ```bash
-memos-cli config list              # 列出所有配置
-memos-cli config get <key>         # 查看配置值
-memos-cli config get <key> --show  # 查看敏感字段明文
-memos-cli config set <key> [value] # 设置配置（敏感字段不传 value 进入交互式输入）
+answer-cli config list              # 列出所有配置
+answer-cli config get <key>         # 查看配置值
+answer-cli config get <key> --show  # 查看敏感字段明文
+answer-cli config set <key> [value] # 设置配置（敏感字段不传 value 进入交互式输入）
 ```
 
 ## 配置项
@@ -48,19 +48,19 @@ memos-cli config set <key> [value] # 设置配置（敏感字段不传 value 进
 
 ```bash
 # Ollama 本地模型
-memos-cli config set ai.provider ollama
-memos-cli config set ai.base_url http://localhost:11434/v1
-memos-cli config set ai.model gemma4:e4b
+answer-cli config set ai.provider ollama
+answer-cli config set ai.base_url http://localhost:11434/v1
+answer-cli config set ai.model gemma4:e4b
 
 # OpenAI
-memos-cli config set ai.provider openai
-memos-cli config set ai.base_url https://api.openai.com/v1
-memos-cli config set ai.model gpt-4o
-memos-cli config set ai.api_key sk-xxx
+answer-cli config set ai.provider openai
+answer-cli config set ai.base_url https://api.openai.com/v1
+answer-cli config set ai.model gpt-4o
+answer-cli config set ai.api_key sk-xxx
 
 # 智谱
-memos-cli config set ai.provider zhipu
-memos-cli config set ai.base_url https://open.bigmodel.cn/api/paas/v4
-memos-cli config set ai.model glm-4
-memos-cli config set ai.api_key your-key
+answer-cli config set ai.provider zhipu
+answer-cli config set ai.base_url https://open.bigmodel.cn/api/paas/v4
+answer-cli config set ai.model glm-4
+answer-cli config set ai.api_key your-key
 ```

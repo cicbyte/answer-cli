@@ -9,9 +9,9 @@ func GetAuthCommand() *cobra.Command {
 		Long: `认证管理 - 登录、登出和查看认证状态。
 
 示例:
-  memos-cli auth login --url=https://memos.example.com
-  memos-cli auth status
-  memos-cli auth logout`,
+  answer-cli auth login --url=https://memos.example.com
+  answer-cli auth status
+  answer-cli auth logout`,
 	}
 	cmd.AddCommand(getLoginCommand())
 	cmd.AddCommand(getLogoutCommand())

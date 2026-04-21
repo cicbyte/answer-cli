@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""本地构建脚本 — 交叉编译 memos-cli 并可选 UPX 压缩"""
+"""本地构建脚本 — 交叉编译 answer-cli 并可选 UPX 压缩"""
 
 import os
 import shutil
@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 VERSION_FILE = ROOT / "VERSION"
 DIST_DIR = ROOT / "dist"
 
-LDFLAGS_PREFIX = "github.com/cicbyte/memos-cli/cmd/version"
+LDFLAGS_PREFIX = "github.com/cicbyte/answer-cli/cmd/version"
 
 
 def read_version() -> str:
@@ -82,7 +82,7 @@ def compress_with_upx(filepath):
 def build_target(goos, goarch, version, commit, build_time):
     """编译单个目标平台"""
     ext = ".exe" if goos == "windows" else ""
-    output_name = f"memos-cli_{goos}_{goarch}{ext}"
+    output_name = f"answer-cli_{goos}_{goarch}{ext}"
     output_path = DIST_DIR / output_name
 
     ldflags = (
@@ -117,7 +117,7 @@ def build_target(goos, goarch, version, commit, build_time):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="memos-cli 本地构建脚本")
+    parser = argparse.ArgumentParser(description="answer-cli 本地构建脚本")
     parser.add_argument("--platform", choices=["windows", "linux", "darwin"], help="仅编译指定平台")
     parser.add_argument("--local", action="store_true", help="仅编译当前平台")
     args = parser.parse_args()
@@ -125,7 +125,7 @@ def main():
     version = read_version()
     commit, build_time = get_build_info()
 
-    print(f"memos-cli {version} | commit: {commit[:8]} | {build_time}")
+    print(f"answer-cli {version} | commit: {commit[:8]} | {build_time}")
     print()
 
     if DIST_DIR.exists():

@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	"github.com/cicbyte/memos-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/models"
 )
 
 // AuthService 认证服务

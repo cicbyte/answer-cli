@@ -5,7 +5,7 @@
 ## 用法
 
 ```bash
-memos-cli chat [问题] [flags]
+answer-cli chat [问题] [flags]
 ```
 
 ## 描述
@@ -42,8 +42,8 @@ Agent 会根据问题自动选择最合适的工具，无需手动指定检索�
 
 ## 前置条件
 
-- 需要先同步数据：`memos-cli sync`
-- 需要配置 AI 服务（`memos-cli config set ai.provider/model/base_url/api_key`）
+- 需要先同步数据：`answer-cli sync`
+- 需要配置 AI 服务（`answer-cli config set ai.provider/model/base_url/api_key`）
 
 ## 参数
 
@@ -76,8 +76,8 @@ Agent 会根据问题自动选择最合适的工具，无需手动指定检索�
 使用 `-i` 进入多轮交互模式：
 
 ```bash
-memos-cli chat -i
-memos-cli chat -i "先总结最近的工作"
+answer-cli chat -i
+answer-cli chat -i "先总结最近的工作"
 ```
 
 多轮模式下：
@@ -89,24 +89,24 @@ memos-cli chat -i "先总结最近的工作"
 
 ```bash
 # 单轮对话
-memos-cli chat "我上周有哪些工作计划？"
+answer-cli chat "我上周有哪些工作计划？"
 
 # 查看备忘录概览
-memos-cli chat "一共有多少条备忘录"
+answer-cli chat "一共有多少条备忘录"
 
 # 指定检索模式
-memos-cli chat "关于React的笔记" -m db
-memos-cli chat "微服务架构思考" -m vector
+answer-cli chat "关于React的笔记" -m db
+answer-cli chat "微服务架构思考" -m vector
 
 # 多轮对话
-memos-cli chat -i
+answer-cli chat -i
 
 # 多轮对话并携带初始问题
-memos-cli chat -i "帮我总结最近的工作"
+answer-cli chat -i "帮我总结最近的工作"
 
 # 显示参考来源完整内容
-memos-cli chat "会议记录" --show-memos
+answer-cli chat "会议记录" --show-memos
 
 # 保存对话记录
-memos-cli chat "技术方案" -o summary.md
+answer-cli chat "技术方案" -o summary.md
 ```

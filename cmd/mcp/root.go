@@ -15,7 +15,7 @@ func GetMcpCommand() *cobra.Command {
 Cherry Studio 配置:
   设置 → 模型服务 → MCP 服务器 → 添加:
     名称: memos
-    命令: memos-cli
+    命令: answer-cli
     参数: mcp
 
 Claude Desktop 配置:
@@ -23,7 +23,7 @@ Claude Desktop 配置:
   {
     "mcpServers": {
       "memos": {
-        "command": "memos-cli",
+        "command": "answer-cli",
         "args": ["mcp"]
       }
     }

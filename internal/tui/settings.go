@@ -3,7 +3,7 @@ package tui
 import (
 	"fmt"
 
-	"github.com/cicbyte/memos-cli/internal/common"
+	"github.com/cicbyte/answer-cli/internal/common"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

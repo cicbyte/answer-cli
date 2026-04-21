@@ -9,11 +9,11 @@ func GetMemoCommand() *cobra.Command {
 		Long: `管理备忘录 - 创建、列出、查看、编辑和删除备忘录。
 
 示例:
-  memos-cli memo list
-  memos-cli memo create --content="Hello, world!"
-  memos-cli memo get <memo-id>
-  memos-cli memo update <memo-id> --content="Updated content"
-  memos-cli memo delete <memo-id>`,
+  answer-cli memo list
+  answer-cli memo create --content="Hello, world!"
+  answer-cli memo get <memo-id>
+  answer-cli memo update <memo-id> --content="Updated content"
+  answer-cli memo delete <memo-id>`,
 	}
 	cmd.AddCommand(getListCommand())
 	cmd.AddCommand(getGetCommand())

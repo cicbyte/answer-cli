@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cicbyte/memos-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/models"
 )
 
 // UserService 用户服务

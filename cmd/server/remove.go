@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	configlogic "github.com/cicbyte/memos-cli/internal/logic/config"
+	"github.com/cicbyte/answer-cli/internal/common"
+	configlogic "github.com/cicbyte/answer-cli/internal/logic/config"
 	"github.com/spf13/cobra"
 )
 
@@ -23,8 +23,8 @@ func getRemoveCommand() *cobra.Command {
 		Long: `删除一个已配置的 Memos 服务器。
 
 示例:
-  memos-cli server remove my-server
-  memos-cli server remove my-server --force`,
+  answer-cli server remove my-server
+  answer-cli server remove my-server --force`,
 		Args: cobra.ExactArgs(1),
 		Run:  runRemove,
 	}

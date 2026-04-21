@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/cicbyte/memos-cli/internal/common"
-	configlogic "github.com/cicbyte/memos-cli/internal/logic/config"
+	"github.com/cicbyte/answer-cli/internal/common"
+	configlogic "github.com/cicbyte/answer-cli/internal/logic/config"
 	"github.com/spf13/cobra"
 )
 
@@ -29,9 +29,9 @@ func getGetCommand() *cobra.Command {
 敏感字段（如 api_key）默认显示为 ******，使用 --show 查看明文。
 
 示例:
-  memos-cli config get ai.model
-  memos-cli config get ai.api_key
-  memos-cli config get ai.api_key --show`,
+  answer-cli config get ai.model
+  answer-cli config get ai.api_key
+  answer-cli config get ai.api_key --show`,
 		Args: cobra.ExactArgs(1),
 		Run:  runGet,
 	}

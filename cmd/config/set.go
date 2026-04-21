@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/cicbyte/memos-cli/internal/common"
-	configlogic "github.com/cicbyte/memos-cli/internal/logic/config"
+	"github.com/cicbyte/answer-cli/internal/common"
+	configlogic "github.com/cicbyte/answer-cli/internal/logic/config"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -28,11 +28,11 @@ func getSetCommand() *cobra.Command {
 敏感字段（如 api_key）会以不回显方式交互式输入，也可通过 value 参数直接传入。
 
 示例:
-  memos-cli config set ai.model qwen2.5
-  memos-cli config set ai.temperature 0.7
-  memos-cli config set ai.api_key sk-xxx
-  memos-cli config set ai.api_key        # 交互式输入（不回显）
-  memos-cli config set log.compress true`,
+  answer-cli config set ai.model qwen2.5
+  answer-cli config set ai.temperature 0.7
+  answer-cli config set ai.api_key sk-xxx
+  answer-cli config set ai.api_key        # 交互式输入（不回显）
+  answer-cli config set log.compress true`,
 		Args: cobra.RangeArgs(1, 2),
 		Run:  runSet,
 	}
@@ -44,7 +44,7 @@ func runSet(cmd *cobra.Command, args []string) {
 	item := configlogic.FindConfigItem(key)
 	if item == nil {
 		fmt.Println(setErrorStyle.Render(fmt.Sprintf("  未知配置项: %s", key)))
-		fmt.Println(setErrorStyle.Render("  使用 'memos-cli config list' 查看所有配置项"))
+		fmt.Println(setErrorStyle.Render("  使用 'answer-cli config list' 查看所有配置项"))
 		os.Exit(1)
 	}
 

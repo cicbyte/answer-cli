@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	configlogic "github.com/cicbyte/memos-cli/internal/logic/config"
+	"github.com/cicbyte/answer-cli/internal/common"
+	configlogic "github.com/cicbyte/answer-cli/internal/logic/config"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +18,7 @@ func getDefaultCommand() *cobra.Command {
 未指定服务器时使用默认服务器。
 
 示例:
-  memos-cli server default my-server`,
+  answer-cli server default my-server`,
 		Args: cobra.ExactArgs(1),
 		Run:  runDefault,
 	}
@@ -32,7 +32,7 @@ func runDefault(cmd *cobra.Command, args []string) {
 
 	if err := processor.Execute(); err != nil {
 		fmt.Printf("Error: %v\n", err)
-		fmt.Println("\n使用 'memos-cli server list' 查看可用服务器。")
+		fmt.Println("\n使用 'answer-cli server list' 查看可用服务器。")
 		os.Exit(1)
 	}
 

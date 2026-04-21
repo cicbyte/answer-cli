@@ -1,17 +1,17 @@
-# memos-cli
+# answer-cli
 
 Memos 个人笔记应用的命令行工具。
 
 ## 用法
 
 ```bash
-memos-cli [flags]
-memos-cli [command]
+answer-cli [flags]
+answer-cli [command]
 ```
 
 ## 描述
 
-直接运行 `memos-cli` 不带任何参数时，启动基于 Bubbletea 的交互式 TUI 界面。也可以使用子命令进行直接操作。
+直接运行 `answer-cli` 不带任何参数时，启动基于 Bubbletea 的交互式 TUI 界面。也可以使用子命令进行直接操作。
 
 ## 子命令
 
@@ -29,37 +29,37 @@ memos-cli [command]
 
 ```bash
 # 启动 TUI 交互界面
-memos-cli
+answer-cli
 
 # 列出备忘录
-memos-cli memo list
+answer-cli memo list
 
 # 同步远程数据
-memos-cli sync
+answer-cli sync
 
 # AI 对话
-memos-cli chat "我上周的工作计划是什么？"
+answer-cli chat "我上周的工作计划是什么？"
 
 # 多轮对话
-memos-cli chat -i
+answer-cli chat -i
 
 # 管理服务器
-memos-cli server add
-memos-cli server list
+answer-cli server add
+answer-cli server list
 
 # 查看配置
-memos-cli config list
+answer-cli config list
 
 # 启动 MCP Server
-memos-cli mcp
+answer-cli mcp
 ```
 
 ## 数据目录
 
-所有数据存储在 `~/.cicbyte/memos-cli/` 下：
+所有数据存储在 `~/.cicbyte/answer-cli/` 下：
 
 ```
-~/.cicbyte/memos-cli/
+~/.cicbyte/answer-cli/
 ├── config/
 │   └── config.yaml    # 应用配置
 ├── db/

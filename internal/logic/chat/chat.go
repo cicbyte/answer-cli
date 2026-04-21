@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cicbyte/memos-cli/internal/ai"
-	"github.com/cicbyte/memos-cli/internal/models"
-	"github.com/cicbyte/memos-cli/internal/utils"
+	"github.com/cicbyte/answer-cli/internal/ai"
+	"github.com/cicbyte/answer-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/utils"
 	"gorm.io/gorm"
 )
 

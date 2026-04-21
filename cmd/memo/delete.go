@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	memologic "github.com/cicbyte/memos-cli/internal/logic/memo"
+	"github.com/cicbyte/answer-cli/internal/common"
+	memologic "github.com/cicbyte/answer-cli/internal/logic/memo"
 	"github.com/spf13/cobra"
 )
 
@@ -24,8 +24,8 @@ func getDeleteCommand() *cobra.Command {
 此操作不可撤销！
 
 示例:
-  memos-cli memo delete 123
-  memos-cli memo delete 123 --force`,
+  answer-cli memo delete 123
+  answer-cli memo delete 123 --force`,
 		Args: cobra.ExactArgs(1),
 		Run:  runDelete,
 	}

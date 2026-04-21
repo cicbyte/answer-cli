@@ -11,10 +11,10 @@ func GetSyncCommand() *cobra.Command {
 支持增量同步和全量同步，可选择自动向量化以启用语义搜索功能。
 
 示例:
-  memos-cli sync
-  memos-cli sync --full
-  memos-cli sync --dry-run
-  memos-cli sync status`,
+  answer-cli sync
+  answer-cli sync --full
+  answer-cli sync --dry-run
+  answer-cli sync status`,
 		Run: runSync,
 	}
 

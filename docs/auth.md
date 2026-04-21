@@ -5,7 +5,7 @@
 ## 用法
 
 ```bash
-memos-cli auth [command]
+answer-cli auth [command]
 ```
 
 ## 子命令
@@ -23,7 +23,7 @@ memos-cli auth [command]
 登录到 Memos 服务器。支持用户名/密码和 Token 两种方式。
 
 ```bash
-memos-cli auth login [flags]
+answer-cli auth login [flags]
 ```
 
 ### 选项
@@ -52,16 +52,16 @@ memos-cli auth login [flags]
 
 ```bash
 # 交互式登录（使用默认服务器）
-memos-cli auth login
+answer-cli auth login
 
 # 指定服务器登录
-memos-cli auth login --url=https://memos.example.com --username=myuser
+answer-cli auth login --url=https://memos.example.com --username=myuser
 
 # 使用 Token 登录
-memos-cli auth login --url=https://memos.example.com --token=my-token
+answer-cli auth login --url=https://memos.example.com --token=my-token
 
 # 登录并命名服务器
-memos-cli auth login --name=work --url=https://work.example.com
+answer-cli auth login --name=work --url=https://work.example.com
 ```
 
 ---
@@ -71,7 +71,7 @@ memos-cli auth login --name=work --url=https://work.example.com
 从服务器登出，清除本地存储的认证 Token。
 
 ```bash
-memos-cli auth logout [flags]
+answer-cli auth logout [flags]
 ```
 
 ### 选项
@@ -85,13 +85,13 @@ memos-cli auth logout [flags]
 
 ```bash
 # 登出默认服务器（有确认提示）
-memos-cli auth logout
+answer-cli auth logout
 
 # 登出指定服务器
-memos-cli auth logout --server=work
+answer-cli auth logout --server=work
 
 # 强制登出
-memos-cli auth logout --force
+answer-cli auth logout --force
 ```
 
 ---
@@ -101,7 +101,7 @@ memos-cli auth logout --force
 显示当前认证状态，包括服务器信息、用户信息和连接状态。
 
 ```bash
-memos-cli auth status
+answer-cli auth status
 ```
 
 ### 输出内容
@@ -113,7 +113,7 @@ memos-cli auth status
 ### 示例
 
 ```bash
-memos-cli auth status
+answer-cli auth status
 ```
 
 输出示例：

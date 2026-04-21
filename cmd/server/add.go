@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	configlogic "github.com/cicbyte/memos-cli/internal/logic/config"
+	"github.com/cicbyte/answer-cli/internal/common"
+	configlogic "github.com/cicbyte/answer-cli/internal/logic/config"
 	"github.com/spf13/cobra"
 )
 
@@ -27,8 +27,8 @@ func getAddCommand() *cobra.Command {
 需要提供服务器名称、URL 和认证 Token。
 
 示例:
-  memos-cli server add
-  memos-cli server add --name=my-server --url=https://memos.example.com --token=your-token`,
+  answer-cli server add
+  answer-cli server add --name=my-server --url=https://memos.example.com --token=your-token`,
 		Run: runAdd,
 	}
 

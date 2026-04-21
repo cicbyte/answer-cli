@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	authlogic "github.com/cicbyte/memos-cli/internal/logic/auth"
+	"github.com/cicbyte/answer-cli/internal/common"
+	authlogic "github.com/cicbyte/answer-cli/internal/logic/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -24,8 +24,8 @@ func getLogoutCommand() *cobra.Command {
 		Long: `登出 Memos 服务器，清除已保存的认证令牌。
 
 示例:
-  memos-cli auth logout
-  memos-cli auth logout --server=my-server`,
+  answer-cli auth logout
+  answer-cli auth logout --server=my-server`,
 		Run: runLogout,
 	}
 

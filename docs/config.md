@@ -1,11 +1,11 @@
 # config
 
-管理 memos-cli 应用配置（AI、Embedding、日志等参数）。
+管理 answer-cli 应用配置（AI、Embedding、日志等参数）。
 
 ## 用法
 
 ```bash
-memos-cli config [command]
+answer-cli config [command]
 ```
 
 ## 子命令
@@ -31,7 +31,7 @@ memos-cli config [command]
 以表格形式列出所有配置项、当前值和说明。
 
 ```bash
-memos-cli config list
+answer-cli config list
 ```
 
 ### 示例
@@ -70,7 +70,7 @@ memos-cli config list
 查看指定配置项的值。
 
 ```bash
-memos-cli config get <key> [flags]
+answer-cli config get <key> [flags]
 ```
 
 ### 选项
@@ -82,13 +82,13 @@ memos-cli config get <key> [flags]
 ### 示例
 
 ```bash
-memos-cli config get ai.model
+answer-cli config get ai.model
 # 输出: llama3.2
 
-memos-cli config get ai.api_key
+answer-cli config get ai.api_key
 # 输出: ******
 
-memos-cli config get ai.api_key --show
+answer-cli config get ai.api_key --show
 # 输出: sk-xxx（明文）
 ```
 
@@ -99,7 +99,7 @@ memos-cli config get ai.api_key --show
 设置指定配置项的值。
 
 ```bash
-memos-cli config set <key> [value] [flags]
+answer-cli config set <key> [value] [flags]
 ```
 
 ### 敏感字段
@@ -109,9 +109,9 @@ memos-cli config set <key> [value] [flags]
 ### 示例
 
 ```bash
-memos-cli config set ai.model qwen2.5
-memos-cli config set ai.temperature 0.7
-memos-cli config set log.level debug
-memos-cli config set ai.api_key sk-xxx
-memos-cli config set ai.api_key        # 交互式输入（不回显）
+answer-cli config set ai.model qwen2.5
+answer-cli config set ai.temperature 0.7
+answer-cli config set log.level debug
+answer-cli config set ai.api_key sk-xxx
+answer-cli config set ai.api_key        # 交互式输入（不回显）
 ```

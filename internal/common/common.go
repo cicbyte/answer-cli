@@ -3,7 +3,7 @@ package common
 import (
 	"sync/atomic"
 
-	"github.com/cicbyte/memos-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/models"
 )
 
 var appConfig atomic.Pointer[models.AppConfig]

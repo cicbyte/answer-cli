@@ -10,10 +10,10 @@ import (
 
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/cicbyte/memos-cli/internal/ai"
-	"github.com/cicbyte/memos-cli/internal/common"
-	chatlogic "github.com/cicbyte/memos-cli/internal/logic/chat"
-	"github.com/cicbyte/memos-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/ai"
+	"github.com/cicbyte/answer-cli/internal/common"
+	chatlogic "github.com/cicbyte/answer-cli/internal/logic/chat"
+	"github.com/cicbyte/answer-cli/internal/models"
 	"github.com/spf13/cobra"
 )
 

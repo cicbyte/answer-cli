@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/cicbyte/memos-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/models"
 	"github.com/sashabaranov/go-openai"
 	"gorm.io/gorm"
 )

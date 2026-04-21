@@ -12,10 +12,10 @@ func GetChatCommand() *cobra.Command {
 使用 --interactive 进入多轮对话模式，支持上下文连续提问。
 
 示例:
-  memos-cli chat "上周有哪些工作计划？"
-  memos-cli chat "关于React的笔记" --tag "编程"
-  memos-cli chat --interactive
-  memos-cli chat --interactive "先帮我总结最近的工作"`,
+  answer-cli chat "上周有哪些工作计划？"
+  answer-cli chat "关于React的笔记" --tag "编程"
+  answer-cli chat --interactive
+  answer-cli chat --interactive "先帮我总结最近的工作"`,
 		Run: runChat,
 	}
 

@@ -1,4 +1,4 @@
-module github.com/cicbyte/memos-cli
+module github.com/cicbyte/answer-cli
 
 go 1.24.0
 

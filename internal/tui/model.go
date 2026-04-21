@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cicbyte/memos-cli/internal/client"
-	"github.com/cicbyte/memos-cli/internal/common"
-	"github.com/cicbyte/memos-cli/internal/models"
-	"github.com/cicbyte/memos-cli/internal/utils"
+	"github.com/cicbyte/answer-cli/internal/client"
+	"github.com/cicbyte/answer-cli/internal/common"
+	"github.com/cicbyte/answer-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/utils"
 	"github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )

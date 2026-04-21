@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/cicbyte/memos-cli/internal/common"
-	synclogic "github.com/cicbyte/memos-cli/internal/logic/sync"
+	"github.com/cicbyte/answer-cli/internal/common"
+	synclogic "github.com/cicbyte/answer-cli/internal/logic/sync"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,7 @@ func getStatusCommand() *cobra.Command {
 func runStatus(cmd *cobra.Command, args []string) {
 	appConfig := common.GetAppConfig()
 	if appConfig == nil || len(appConfig.Servers) == 0 {
-		fmt.Println(statusErrorStyle.Render("  未配置服务器，请先运行 memos-cli server add"))
+		fmt.Println(statusErrorStyle.Render("  未配置服务器，请先运行 answer-cli server add"))
 		os.Exit(1)
 	}
 

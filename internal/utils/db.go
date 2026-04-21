@@ -3,7 +3,7 @@ package utils
 import (
 	"sync"
 
-	"github.com/cicbyte/memos-cli/internal/log"
+	"github.com/cicbyte/answer-cli/internal/log"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )

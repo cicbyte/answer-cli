@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cicbyte/memos-cli/internal/models"
-	"github.com/cicbyte/memos-cli/internal/utils"
+	"github.com/cicbyte/answer-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/utils"
 )
 
 // Add
@@ -212,7 +212,7 @@ func NewGetProcessor(appConfig *models.AppConfig) *GetProcessor {
 func (p *GetProcessor) Execute(key string) (*GetResult, error) {
 	item := FindConfigItem(key)
 	if item == nil {
-		return nil, fmt.Errorf("未知配置项: %s\n使用 'memos-cli config list' 查看所有配置项", key)
+		return nil, fmt.Errorf("未知配置项: %s\n使用 'answer-cli config list' 查看所有配置项", key)
 	}
 
 	value := GetConfigValue(p.appConfig, key)
@@ -230,7 +230,7 @@ func NewSetProcessor(appConfig *models.AppConfig) *SetProcessor {
 func (p *SetProcessor) Execute(key, value string) error {
 	item := FindConfigItem(key)
 	if item == nil {
-		return fmt.Errorf("未知配置项: %s\n使用 'memos-cli config list' 查看所有配置项", key)
+		return fmt.Errorf("未知配置项: %s\n使用 'answer-cli config list' 查看所有配置项", key)
 	}
 
 	if err := setConfigValue(p.appConfig, key, value); err != nil {

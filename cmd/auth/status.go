@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	authlogic "github.com/cicbyte/memos-cli/internal/logic/auth"
+	"github.com/cicbyte/answer-cli/internal/common"
+	authlogic "github.com/cicbyte/answer-cli/internal/logic/auth"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +19,7 @@ func getStatusCommand() *cobra.Command {
 显示当前用户信息和服务器连接状态。
 
 示例:
-  memos-cli auth status`,
+  answer-cli auth status`,
 			Run: runStatus,
 	}
 }
@@ -38,7 +38,7 @@ func runStatus(cmd *cobra.Command, args []string) {
 
 	if result.ServerName == "" {
 		fmt.Println("  未配置服务器。")
-		fmt.Println("\n  请先运行 'memos-cli auth login' 登录。")
+		fmt.Println("\n  请先运行 'answer-cli auth login' 登录。")
 		return
 	}
 
@@ -48,7 +48,7 @@ func runStatus(cmd *cobra.Command, args []string) {
 	if !result.Authenticated {
 		fmt.Println()
 		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("11")).Render("  状态: 未认证"))
-		fmt.Println("\n  请运行 'memos-cli auth login' 进行认证。")
+		fmt.Println("\n  请运行 'answer-cli auth login' 进行认证。")
 		return
 	}
 
@@ -56,7 +56,7 @@ func runStatus(cmd *cobra.Command, args []string) {
 		fmt.Println()
 		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Render("  状态: 认证失败"))
 		fmt.Printf("  错误: %v\n", result.AuthError)
-		fmt.Println("\n  请运行 'memos-cli auth login' 重新认证。")
+		fmt.Println("\n  请运行 'answer-cli auth login' 重新认证。")
 		return
 	}
 

@@ -3,7 +3,7 @@
 ## memo list
 
 ```bash
-memos-cli memo list [flags]
+answer-cli memo list [flags]
 ```
 
 | 标志 | 简写 | 默认值 | 说明 |
@@ -18,13 +18,13 @@ memos-cli memo list [flags]
 | `--archived` | — | false | 显示已归档 |
 
 ```bash
-memos-cli memo list                           # 最近 20 条
-memos-cli memo list --page=2                  # 第 2 页
-memos-cli memo list --tag=work                # 按标签过滤
-memos-cli memo list --search="会议记录"        # 文本搜索
-memos-cli memo list --from=2026-01-01          # 按起始日期
-memos-cli memo list --from=2025-07-01 --to=2025-12-31  # 日期范围
-memos-cli memo list --page=all                # 全部
+answer-cli memo list                           # 最近 20 条
+answer-cli memo list --page=2                  # 第 2 页
+answer-cli memo list --tag=work                # 按标签过滤
+answer-cli memo list --search="会议记录"        # 文本搜索
+answer-cli memo list --from=2026-01-01          # 按起始日期
+answer-cli memo list --from=2025-07-01 --to=2025-12-31  # 日期范围
+answer-cli memo list --page=all                # 全部
 ```
 
 ## memo stats
@@ -32,13 +32,13 @@ memos-cli memo list --page=all                # 全部
 显示统计概览：总数、可见性分布、热门标签、最近备忘录。
 
 ```bash
-memos-cli memo stats
+answer-cli memo stats
 ```
 
 ## memo get
 
 ```bash
-memos-cli memo get <id> [--raw|-r]
+answer-cli memo get <id> [--raw|-r]
 ```
 
 `--raw` 仅输出原始内容，适合管道处理。
@@ -48,16 +48,16 @@ memos-cli memo get <id> [--raw|-r]
 输入优先级：`--content`/`--file` > 管道输入 > 交互式输入。
 
 ```bash
-memos-cli memo create -c "内容" -v private     # 参数创建
-memos-cli memo create -f note.md               # 从文件
-echo "内容" | memos-cli memo create            # 管道
-memos-cli memo create                          # 交互式
+answer-cli memo create -c "内容" -v private     # 参数创建
+answer-cli memo create -f note.md               # 从文件
+echo "内容" | answer-cli memo create            # 管道
+answer-cli memo create                          # 交互式
 ```
 
 ## memo update
 
 ```bash
-memos-cli memo update <id> [flags]
+answer-cli memo update <id> [flags]
 ```
 
 | 标志 | 说明 |
@@ -71,5 +71,5 @@ memos-cli memo update <id> [flags]
 ## memo delete
 
 ```bash
-memos-cli memo delete <id> [--force|-f]
+answer-cli memo delete <id> [--force|-f]
 ```

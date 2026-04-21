@@ -11,11 +11,11 @@ func GetServerCommand() *cobra.Command {
 支持添加、列出、删除服务器和设置默认服务器。
 
 示例:
-  memos-cli server add
-  memos-cli server add --name=my-server --url=https://memos.example.com --token=xxx
-  memos-cli server list
-  memos-cli server default my-server
-  memos-cli server remove my-server`,
+  answer-cli server add
+  answer-cli server add --name=my-server --url=https://memos.example.com --token=xxx
+  answer-cli server list
+  answer-cli server default my-server
+  answer-cli server remove my-server`,
 	}
 	cmd.AddCommand(getAddCommand())
 	cmd.AddCommand(getListCommand())

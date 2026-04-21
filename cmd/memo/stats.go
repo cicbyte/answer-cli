@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	memologic "github.com/cicbyte/memos-cli/internal/logic/memo"
+	"github.com/cicbyte/answer-cli/internal/common"
+	memologic "github.com/cicbyte/answer-cli/internal/logic/memo"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +21,7 @@ func getStatsCommand() *cobra.Command {
 显示总数、可见性分布、热门标签和最近备忘录。
 
 示例:
-  memos-cli memo stats`,
+  answer-cli memo stats`,
 		Run: runStats,
 	}
 }
@@ -37,7 +37,7 @@ func runStats(cmd *cobra.Command, args []string) {
 	if result.TotalCount == 0 {
 		fmt.Println()
 		fmt.Println("💡 本地数据库为空，请先同步:")
-		fmt.Println("   memos-cli sync")
+		fmt.Println("   answer-cli sync")
 		fmt.Println()
 		return
 	}

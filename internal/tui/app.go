@@ -1,4 +1,4 @@
-// Package tui provides terminal user interface for memos-cli
+// Package tui provides terminal user interface for answer-cli
 package tui
 
 import (

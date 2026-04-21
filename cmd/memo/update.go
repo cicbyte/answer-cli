@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	memologic "github.com/cicbyte/memos-cli/internal/logic/memo"
+	"github.com/cicbyte/answer-cli/internal/common"
+	memologic "github.com/cicbyte/answer-cli/internal/logic/memo"
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +28,9 @@ func getUpdateCommand() *cobra.Command {
 		Long: `更新备忘录。
 
 示例:
-  memos-cli memo update 123 --content="New content"
-  memos-cli memo update 123 --visibility=private
-  memos-cli memo update 123 --archive`,
+  answer-cli memo update 123 --content="New content"
+  answer-cli memo update 123 --visibility=private
+  answer-cli memo update 123 --archive`,
 		Args: cobra.ExactArgs(1),
 		Run:  runUpdate,
 	}

@@ -5,7 +5,7 @@ package main
 
 
 
-import "github.com/cicbyte/memos-cli/cmd"
+import "github.com/cicbyte/answer-cli/cmd"
 
 func main() {
 	cmd.Execute()

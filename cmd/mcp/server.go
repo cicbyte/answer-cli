@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cicbyte/memos-cli/internal/ai"
-	"github.com/cicbyte/memos-cli/internal/client"
-	"github.com/cicbyte/memos-cli/internal/common"
-	"github.com/cicbyte/memos-cli/internal/models"
-	"github.com/cicbyte/memos-cli/internal/utils"
+	"github.com/cicbyte/answer-cli/internal/ai"
+	"github.com/cicbyte/answer-cli/internal/client"
+	"github.com/cicbyte/answer-cli/internal/common"
+	"github.com/cicbyte/answer-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/spf13/cobra"
@@ -24,7 +24,7 @@ func runMcp(cmd *cobra.Command, args []string) error {
 
 func newMCPServer() *server.MCPServer {
 	s := server.NewMCPServer(
-		"github.com/cicbyte/memos-cli",
+		"github.com/cicbyte/answer-cli",
 		"0.1.0",
 		server.WithToolCapabilities(true),
 	)
@@ -125,7 +125,7 @@ func handleGet(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolR
 func handleCreate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	srv := common.GetAppConfig().GetDefaultServer()
 	if srv == nil || srv.Token == "" {
-		return mcp.NewToolResultError("未配置服务器，请先运行 memos-cli auth login"), nil
+		return mcp.NewToolResultError("未配置服务器，请先运行 answer-cli auth login"), nil
 	}
 
 	c := client.NewClient(&client.Config{

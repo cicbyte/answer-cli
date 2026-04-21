@@ -5,7 +5,7 @@
 ## 用法
 
 ```bash
-memos-cli chat [问题] [flags]
+answer-cli chat [问题] [flags]
 ```
 
 ## 选项
@@ -40,8 +40,8 @@ Agent 通过 function calling 自动选择：
 ## 多轮对话
 
 ```bash
-memos-cli chat -i                           # 进入多轮模式
-memos-cli chat -i "先总结最近的工作"         # 携带初始问题
+answer-cli chat -i                           # 进入多轮模式
+answer-cli chat -i "先总结最近的工作"         # 携带初始问题
 ```
 
 - 输入 `/quit`、`/exit` 或 `q` 退出
@@ -49,6 +49,6 @@ memos-cli chat -i "先总结最近的工作"         # 携带初始问题
 
 ## 前置条件
 
-- 需要 AI 服务配置（`memos-cli config set ai.provider/model/base_url/api_key`）
+- 需要 AI 服务配置（`answer-cli config set ai.provider/model/base_url/api_key`）
 - `vector` 模式需要 Embedding 服务配置
-- 需要先 `memos-cli sync` 同步数据
+- 需要先 `answer-cli sync` 同步数据

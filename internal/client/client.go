@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cicbyte/memos-cli/internal/log"
+	"github.com/cicbyte/answer-cli/internal/log"
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
 )

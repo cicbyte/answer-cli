@@ -3,8 +3,8 @@ package server
 import (
 	"fmt"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	configlogic "github.com/cicbyte/memos-cli/internal/logic/config"
+	"github.com/cicbyte/answer-cli/internal/common"
+	configlogic "github.com/cicbyte/answer-cli/internal/logic/config"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +27,7 @@ func getListCommand() *cobra.Command {
 显示服务器名称、URL 和默认标记。
 
 示例:
-  memos-cli server list`,
+  answer-cli server list`,
 		Run: runList,
 	}
 }
@@ -38,7 +38,7 @@ func runList(cmd *cobra.Command, args []string) {
 
 	if len(result.Servers) == 0 {
 		fmt.Println("暂无已配置的服务器。")
-		fmt.Println("\n使用 'memos-cli server add' 添加服务器。")
+		fmt.Println("\n使用 'answer-cli server add' 添加服务器。")
 		return
 	}
 

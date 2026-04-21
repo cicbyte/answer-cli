@@ -5,7 +5,7 @@
 ## 用法
 
 ```bash
-memos-cli sync [flags]
+answer-cli sync [flags]
 ```
 
 ## 描述
@@ -16,7 +16,7 @@ memos-cli sync [flags]
 
 ## 前置条件
 
-- 需要先配置服务器：`memos-cli server add` 或 `memos-cli auth login`
+- 需要先配置服务器：`answer-cli server add` 或 `answer-cli auth login`
 
 ## 选项
 
@@ -35,7 +35,7 @@ memos-cli sync [flags]
 显示当前同步状态信息。
 
 ```bash
-memos-cli sync status
+answer-cli sync status
 ```
 
 输出包含：服务器名称、最后同步时间、本地备忘录数量、同步状态（idle/syncing/error）。
@@ -44,16 +44,16 @@ memos-cli sync status
 
 ```bash
 # 增量同步（默认）
-memos-cli sync
+answer-cli sync
 
 # 全量同步（会删除所有本地数据）
-memos-cli sync --full --force
+answer-cli sync --full --force
 
 # 同步但不生成向量
-memos-cli sync --no-vectorize
+answer-cli sync --no-vectorize
 
 # 查看同步状态
-memos-cli sync status
+answer-cli sync status
 ```
 
 ## 输出示例

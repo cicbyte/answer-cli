@@ -1,4 +1,4 @@
-# memos-cli
+# answer-cli
 
 [Memos](https://github.com/usememos/memos) 的命令行工具。将远程备忘录同步到本地 SQLite，通过 CLI 或 AI Skill 让 AI 以最少 token、最稳定的方式检索你的笔记。
 
@@ -23,14 +23,14 @@
 
 ### 从 Release 下载
 
-前往 [Releases](https://github.com/cicbyte/memos-cli/releases) 下载对应平台的预编译二进制文件。
+前往 [Releases](https://github.com/cicbyte/answer-cli/releases) 下载对应平台的预编译二进制文件。
 
 ### 从源码构建
 
 ```bash
-git clone https://github.com/cicbyte/memos-cli.git
-cd memos-cli
-go build -o memos-cli .
+git clone https://github.com/cicbyte/answer-cli.git
+cd answer-cli
+go build -o answer-cli .
 ```
 
 交叉编译：
@@ -44,50 +44,50 @@ python scripts/build.py             # 全平台（Windows/Linux/macOS）
 
 ```bash
 # 添加 Memos 服务器配置
-memos-cli server add
+answer-cli server add
 
 # 登录服务器
-memos-cli auth login
+answer-cli auth login
 
 # 同步远程 memo 到本地
-memos-cli sync
+answer-cli sync
 
 # 与备忘录对话
-memos-cli chat "我上周有哪些工作计划？"
+answer-cli chat "我上周有哪些工作计划？"
 
 # 启动 TUI 交互界面
-memos-cli
+answer-cli
 ```
 
 ## 命令一览
 
 | 命令 | 说明 |
 |------|------|
-| `memos-cli` | 启动 TUI 交互界面 |
-| `memos-cli mcp` | 启动 MCP Server |
-| `memos-cli chat [问题]` | 与备忘录 AI 对话（默认单轮，`-i` 多轮） |
-| `memos-cli memo list` | 列出备忘录列表 |
-| `memos-cli memo stats` | 备忘录统计概览 |
-| `memos-cli memo get <id>` | 查看 memo 详情 |
-| `memos-cli memo create` | 创建 memo（支持管道输入） |
-| `memos-cli memo update <id>` | 更新 memo |
-| `memos-cli memo delete <id>` | 删除 memo |
-| `memos-cli sync` | 同步远程备忘录到本地 |
-| `memos-cli sync status` | 查看同步状态 |
-| `memos-cli server add` | 添加服务器配置 |
-| `memos-cli server list` | 列出服务器配置 |
-| `memos-cli server default <name>` | 设置默认服务器 |
-| `memos-cli server remove <name>` | 删除服务器配置 |
-| `memos-cli config list` | 查看应用配置项 |
-| `memos-cli config get <key>` | 查看配置值 |
-| `memos-cli config set <key> <value>` | 设置配置项 |
-| `memos-cli auth login` | 登录服务器 |
-| `memos-cli auth logout` | 登出服务器 |
-| `memos-cli auth status` | 查看认证状态 |
+| `answer-cli` | 启动 TUI 交互界面 |
+| `answer-cli mcp` | 启动 MCP Server |
+| `answer-cli chat [问题]` | 与备忘录 AI 对话（默认单轮，`-i` 多轮） |
+| `answer-cli memo list` | 列出备忘录列表 |
+| `answer-cli memo stats` | 备忘录统计概览 |
+| `answer-cli memo get <id>` | 查看 memo 详情 |
+| `answer-cli memo create` | 创建 memo（支持管道输入） |
+| `answer-cli memo update <id>` | 更新 memo |
+| `answer-cli memo delete <id>` | 删除 memo |
+| `answer-cli sync` | 同步远程备忘录到本地 |
+| `answer-cli sync status` | 查看同步状态 |
+| `answer-cli server add` | 添加服务器配置 |
+| `answer-cli server list` | 列出服务器配置 |
+| `answer-cli server default <name>` | 设置默认服务器 |
+| `answer-cli server remove <name>` | 删除服务器配置 |
+| `answer-cli config list` | 查看应用配置项 |
+| `answer-cli config get <key>` | 查看配置值 |
+| `answer-cli config set <key> <value>` | 设置配置项 |
+| `answer-cli auth login` | 登录服务器 |
+| `answer-cli auth logout` | 登出服务器 |
+| `answer-cli auth status` | 查看认证状态 |
 
 ## MCP Server
 
-`memos-cli mcp` 以 stdio 模式运行 MCP Server，让 AI 客户端能直接搜索和操作本地备忘录。
+`answer-cli mcp` 以 stdio 模式运行 MCP Server，让 AI 客户端能直接搜索和操作本地备忘录。
 
 注册的 Tools：`memo_search`、`memo_semantic_search`、`memo_get`、`memo_create`、`memo_stats`
 
@@ -95,7 +95,7 @@ memos-cli
 
 设置 → 模型服务 → MCP 服务器 → 添加：
 - 名称：`memos`
-- 命令：`memos-cli`
+- 命令：`answer-cli`
 - 参数：`mcp`
 
 **Claude Desktop 配置：**
@@ -104,7 +104,7 @@ memos-cli
 {
   "mcpServers": {
     "memos": {
-      "command": "memos-cli",
+      "command": "answer-cli",
       "args": ["mcp"]
     }
   }
@@ -113,7 +113,7 @@ memos-cli
 
 ## AI 配置
 
-通过 `memos-cli config set` 或直接编辑 `~/.cicbyte/memos-cli/config/config.yaml` 配置。
+通过 `answer-cli config set` 或直接编辑 `~/.cicbyte/answer-cli/config/config.yaml` 配置。
 
 **OpenAI：**
 
@@ -161,17 +161,17 @@ Embedding 配置结构相同，使用 `embedding` 字段。
 `memo create` 支持管道输入，优先级：`--content` / `--file` > 管道输入 > 交互式输入。
 
 ```bash
-echo "内容" | memos-cli memo create
-cat note.md | memos-cli memo create
-memos-cli memo create --content="直接指定内容"
+echo "内容" | answer-cli memo create
+cat note.md | answer-cli memo create
+answer-cli memo create --content="直接指定内容"
 ```
 
 ## 数据存储
 
-所有数据存储在 `~/.cicbyte/memos-cli/` 目录下：
+所有数据存储在 `~/.cicbyte/answer-cli/` 目录下：
 
 ```
-~/.cicbyte/memos-cli/
+~/.cicbyte/answer-cli/
 ├── config/
 │   └── config.yaml    # 应用配置
 ├── db/
@@ -193,14 +193,14 @@ memos-cli memo create --content="直接指定内容"
 
 ## AI Skill
 
-项目附带 `memos-cli` skill，指导 AI 正确使用 memos-cli 命令。skill 文件位于 `skills/memos-cli/`，可通过 junction 链接到 `.claude/skills/` 供 Claude Code 使用：
+项目附带 `answer-cli` skill，指导 AI 正确使用 answer-cli 命令。skill 文件位于 `skills/answer-cli/`，可通过 junction 链接到 `.claude/skills/` 供 Claude Code 使用：
 
 ```bash
-powershell -Command "New-Item -ItemType Junction -Path '.claude\skills\memos-cli' -Target 'skills\memos-cli'"
+powershell -Command "New-Item -ItemType Junction -Path '.claude\skills\answer-cli' -Target 'skills\answer-cli'"
 ```
 
 Skill 会自动约束 AI 的行为：
-- 禁止启动交互式 TUI（`memos-cli` 无参数）
+- 禁止启动交互式 TUI（`answer-cli` 无参数）
 - 禁止执行需要交互式输入的命令（如无参数的 `auth login`、`server add`）
 - 禁止修改配置（`config set`）
 - 只允许执行非交互式的只读/写入命令（`memo list`、`memo get`、`memo create -c "..."`、`sync`、`chat "问题"` 等）

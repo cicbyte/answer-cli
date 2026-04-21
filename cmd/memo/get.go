@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	memologic "github.com/cicbyte/memos-cli/internal/logic/memo"
+	"github.com/cicbyte/answer-cli/internal/common"
+	memologic "github.com/cicbyte/answer-cli/internal/logic/memo"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
@@ -20,8 +20,8 @@ func getGetCommand() *cobra.Command {
 		Long: `查看备忘录详情。
 
 示例:
-  memos-cli memo get 123
-  memos-cli memo get 123 --raw`,
+  answer-cli memo get 123
+  answer-cli memo get 123 --raw`,
 		Args: cobra.ExactArgs(1),
 		Run:  runGet,
 	}

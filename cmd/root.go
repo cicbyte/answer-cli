@@ -7,17 +7,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cicbyte/memos-cli/cmd/auth"
-	"github.com/cicbyte/memos-cli/cmd/chat"
-	"github.com/cicbyte/memos-cli/cmd/config"
-	"github.com/cicbyte/memos-cli/cmd/mcp"
-	"github.com/cicbyte/memos-cli/cmd/memo"
-	"github.com/cicbyte/memos-cli/cmd/server"
-	"github.com/cicbyte/memos-cli/cmd/sync"
-	"github.com/cicbyte/memos-cli/internal/common"
-	"github.com/cicbyte/memos-cli/internal/log"
-	"github.com/cicbyte/memos-cli/internal/tui"
-	"github.com/cicbyte/memos-cli/internal/utils"
+	"github.com/cicbyte/answer-cli/cmd/auth"
+	"github.com/cicbyte/answer-cli/cmd/chat"
+	"github.com/cicbyte/answer-cli/cmd/config"
+	"github.com/cicbyte/answer-cli/cmd/mcp"
+	"github.com/cicbyte/answer-cli/cmd/memo"
+	"github.com/cicbyte/answer-cli/cmd/server"
+	"github.com/cicbyte/answer-cli/cmd/sync"
+	"github.com/cicbyte/answer-cli/internal/common"
+	"github.com/cicbyte/answer-cli/internal/log"
+	"github.com/cicbyte/answer-cli/internal/tui"
+	"github.com/cicbyte/answer-cli/internal/utils"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -25,17 +25,17 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "memos-cli",
+	Use:   "answer-cli",
 	Short: "Memos 个人笔记命令行工具",
-	Long: `memos-cli - Memos 个人笔记应用的命令行工具。
+	Long: `answer-cli - Memos 个人笔记应用的命令行工具。
 
 不带参数运行时启动交互式 TUI 界面，也可以使用子命令直接操作。
 
 示例:
-  memos-cli              # 启动 TUI 界面
-  memos-cli memo list    # 列出备忘录
-  memos-cli auth login   # 登录服务器
-  memos-cli server add   # 添加服务器配置`,
+  answer-cli              # 启动 TUI 界面
+  answer-cli memo list    # 列出备忘录
+  answer-cli auth login   # 登录服务器
+  answer-cli server add   # 添加服务器配置`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// 无参数时启动 TUI
 		if err := tui.StartTUI(); err != nil {

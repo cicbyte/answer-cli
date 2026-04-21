@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
-	"github.com/cicbyte/memos-cli/internal/client"
-	"github.com/cicbyte/memos-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/client"
+	"github.com/cicbyte/answer-cli/internal/models"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"

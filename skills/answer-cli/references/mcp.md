@@ -5,7 +5,7 @@
 ## 启动
 
 ```bash
-memos-cli mcp
+answer-cli mcp
 ```
 
 ## 注册的 Tools
@@ -24,7 +24,7 @@ memos-cli mcp
 
 设置 -> 模型服务 -> MCP 服务器 -> 添加：
 - 名称：`memos`
-- 命令：`memos-cli`
+- 命令：`answer-cli`
 - 参数：`mcp`
 
 ### Claude Desktop
@@ -34,7 +34,7 @@ memos-cli mcp
 {
   "mcpServers": {
     "memos": {
-      "command": "memos-cli",
+      "command": "answer-cli",
       "args": ["mcp"]
     }
   }
@@ -48,7 +48,7 @@ memos-cli mcp
 {
   "mcpServers": {
     "memos": {
-      "command": "memos-cli",
+      "command": "answer-cli",
       "args": ["mcp"]
     }
   }

@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/cicbyte/memos-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/models"
 	"go.yaml.in/yaml/v3"
 )
 
@@ -56,7 +56,7 @@ func (c *Config) GetAppDir() string {
 	if c.AppDir != "" {
 		return c.AppDir
 	}
-	c.AppDir = c.GetAppSeriesDir() + "/memos-cli"
+	c.AppDir = c.GetAppSeriesDir() + "/answer-cli"
 	return c.AppDir
 }
 
@@ -102,7 +102,7 @@ func (c *Config) GetLogDir() string {
 func (c *Config) GetLogPath() string {
 	if c.LogPath == "" {
 		now := time.Now().Format("20060102")
-		c.LogPath = filepath.Join(c.GetLogDir(), fmt.Sprintf("memos-cli_log_%s.log", now))
+		c.LogPath = filepath.Join(c.GetLogDir(), fmt.Sprintf("answer-cli_log_%s.log", now))
 	}
 	return c.LogPath
 }

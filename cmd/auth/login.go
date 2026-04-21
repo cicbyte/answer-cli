@@ -8,8 +8,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	authlogic "github.com/cicbyte/memos-cli/internal/logic/auth"
+	"github.com/cicbyte/answer-cli/internal/common"
+	authlogic "github.com/cicbyte/answer-cli/internal/logic/auth"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -31,10 +31,10 @@ func getLoginCommand() *cobra.Command {
 支持用户名/密码或 Token 两种方式登录。
 
 示例:
-  memos-cli auth login
-  memos-cli auth login --url=https://memos.example.com --username=myuser
-  memos-cli auth login --url=https://memos.example.com --token=my-token
-  memos-cli auth login --name=my-server --url=https://memos.example.com`,
+  answer-cli auth login
+  answer-cli auth login --url=https://memos.example.com --username=myuser
+  answer-cli auth login --url=https://memos.example.com --token=my-token
+  answer-cli auth login --name=my-server --url=https://memos.example.com`,
 		Run: runLogin,
 	}
 

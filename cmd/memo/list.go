@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cicbyte/memos-cli/internal/common"
-	memologic "github.com/cicbyte/memos-cli/internal/logic/memo"
-	"github.com/cicbyte/memos-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/common"
+	memologic "github.com/cicbyte/answer-cli/internal/logic/memo"
+	"github.com/cicbyte/answer-cli/internal/models"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
@@ -47,16 +47,16 @@ func getListCommand() *cobra.Command {
 		Aliases: []string{"ls"},
 		Long: `列出本地数据库中的备忘录。
 
-注意: 请先运行 'memos-cli sync' 同步远程备忘录。
+注意: 请先运行 'answer-cli sync' 同步远程备忘录。
 
 示例:
-  memos-cli memo list
-  memos-cli memo list --page=2
-  memos-cli memo list --page=all
-  memos-cli memo list --visibility=public
-  memos-cli memo list --tag=work
-  memos-cli memo list --search="关键词"
-  memos-cli memo list --archived`,
+  answer-cli memo list
+  answer-cli memo list --page=2
+  answer-cli memo list --page=all
+  answer-cli memo list --visibility=public
+  answer-cli memo list --tag=work
+  answer-cli memo list --search="关键词"
+  answer-cli memo list --archived`,
 		Run: runList,
 	}
 
@@ -94,7 +94,7 @@ func runList(cmd *cobra.Command, args []string) {
 	if result.TotalCount == 0 {
 		fmt.Println()
 		fmt.Println("💡 本地数据库为空，请先同步:")
-		fmt.Println("   memos-cli sync")
+		fmt.Println("   answer-cli sync")
 		fmt.Println()
 		return
 	}

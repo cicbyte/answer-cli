@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cicbyte/memos-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/models"
 	"github.com/go-resty/resty/v2"
 	"gorm.io/gorm"
 )
