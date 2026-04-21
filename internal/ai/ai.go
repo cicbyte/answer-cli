@@ -4,22 +4,18 @@ import (
 	"context"
 	"strings"
 
-	"github.com/cicbyte/answer-cli/internal/models"
+	"github.com/cicbyte/answer-cli/internal/client"
 	"github.com/sashabaranov/go-openai"
-	"gorm.io/gorm"
 )
 
 type AIService struct {
-	embedding *EmbeddingService
 	llmClient *openai.Client
 	model     string
 	baseURL   string
-	provider  string
-	apiKey    string
-	db        *gorm.DB
+	apiClient *client.Client
 }
 
-func NewAIService(provider, baseURL, model, apiKey string, embedding *EmbeddingService, db *gorm.DB) *AIService {
+func NewAIService(provider, baseURL, model, apiKey string, apiClient *client.Client) *AIService {
 	if provider == "ollama" {
 		if !strings.HasSuffix(baseURL, "/v1") {
 			baseURL = strings.TrimSuffix(baseURL, "/") + "/v1"
@@ -30,29 +26,11 @@ func NewAIService(provider, baseURL, model, apiKey string, embedding *EmbeddingS
 	config.BaseURL = baseURL
 
 	return &AIService{
-		embedding: embedding,
 		llmClient: openai.NewClientWithConfig(config),
 		model:     model,
 		baseURL:   baseURL,
-		provider:  provider,
-		apiKey:    apiKey,
-		db:        db,
+		apiClient: apiClient,
 	}
-}
-
-type AskRequest struct {
-	Question     string
-	Filter       *models.SearchFilter
-	ContextLimit int
-	SearchMode   SearchMode
-}
-
-type AskResponse struct {
-	Answer           string
-	Sources          []*models.LocalMemo
-	Model            string
-	PromptTokens     int
-	CompletionTokens int
 }
 
 type ChatMessage struct {
@@ -60,42 +38,25 @@ type ChatMessage struct {
 	Content string
 }
 
-func (s *AIService) Ask(ctx context.Context, req *AskRequest) (*AskResponse, error) {
-	agent := NewAgent(s.llmClient, s.embedding, s.db, s.model)
-	result, err := agent.Ask(ctx, req.Question, req.SearchMode)
+type StreamCallback func(text string)
+
+type AskResponse struct {
+	Answer           string
+	Model            string
+	PromptTokens     int
+	CompletionTokens int
+}
+
+func (s *AIService) AskStream(ctx context.Context, question string, history []ChatMessage, cb StreamCallback) error {
+	agent := NewAgent(s.llmClient, s.apiClient, s.model)
+	return agent.AskStream(ctx, question, history, cb)
+}
+
+func (s *AIService) Ask(ctx context.Context, question string, history []ChatMessage) (*AskResponse, error) {
+	agent := NewAgent(s.llmClient, s.apiClient, s.model)
+	result, err := agent.Ask(ctx, question, history)
 	if err != nil {
 		return nil, err
 	}
-	return &AskResponse{
-		Answer:           result.Answer,
-		Sources:          result.Sources,
-		Model:            result.Model,
-		PromptTokens:     result.PromptTokens,
-		CompletionTokens: result.CompletionTokens,
-	}, nil
-}
-
-func (s *AIService) AskWithHistory(ctx context.Context, question string, history []ChatMessage, mode SearchMode) (*AskResponse, error) {
-	agent := NewAgent(s.llmClient, s.embedding, s.db, s.model)
-	result, err := agent.AskWithHistory(ctx, question, history, mode)
-	if err != nil {
-		return nil, err
-	}
-	return &AskResponse{
-		Answer:           result.Answer,
-		Sources:          result.Sources,
-		Model:            result.Model,
-		PromptTokens:     result.PromptTokens,
-		CompletionTokens: result.CompletionTokens,
-	}, nil
-}
-
-func (s *AIService) AskStream(ctx context.Context, req *AskRequest, cb StreamCallback) error {
-	agent := NewAgent(s.llmClient, s.embedding, s.db, s.model)
-	return agent.AskStream(ctx, req.Question, req.SearchMode, cb)
-}
-
-func (s *AIService) AskWithHistoryStream(ctx context.Context, question string, history []ChatMessage, mode SearchMode, cb StreamCallback) error {
-	agent := NewAgent(s.llmClient, s.embedding, s.db, s.model)
-	return agent.AskWithHistoryStream(ctx, question, history, mode, cb)
+	return result, nil
 }

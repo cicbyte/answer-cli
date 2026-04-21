@@ -38,3 +38,9 @@ func (c *AppConfig) GetServerURL() string {
 func (c *AppConfig) GetServerToken() string {
 	return c.Server.Token
 }
+
+func (c *AppConfig) GetAIProvider() string   { return c.AI.Provider }
+func (c *AppConfig) GetAIBaseURL() string    { return c.AI.BaseURL }
+func (c *AppConfig) GetAIAPIKey() string     { return c.AI.ApiKey }
+func (c *AppConfig) GetAIModel() string      { return c.AI.Model }
+func (c *AppConfig) GetOutputFormat() string { return c.Output.Format }

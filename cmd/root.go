@@ -6,6 +6,7 @@ import (
 
 	"github.com/cicbyte/answer-cli/cmd/answer"
 	"github.com/cicbyte/answer-cli/cmd/auth"
+	"github.com/cicbyte/answer-cli/cmd/chat"
 	"github.com/cicbyte/answer-cli/cmd/comment"
 	"github.com/cicbyte/answer-cli/cmd/config"
 	"github.com/cicbyte/answer-cli/cmd/mcp"
@@ -63,4 +64,5 @@ func init() {
 	rootCmd.AddCommand(user.GetUserCommand())
 	rootCmd.AddCommand(vote.GetVoteCommand())
 	rootCmd.AddCommand(mcp.GetMcpCommand())
+	rootCmd.AddCommand(chat.GetChatCommand())
 }

@@ -2,7 +2,7 @@ package models
 
 type PageModel struct {
 	Count int64       `json:"count"`
-	List  interface{} `json:"list"`
+	List  any `json:"list"`
 }
 
 type TagItem struct {
