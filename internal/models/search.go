@@ -1,22 +1,25 @@
 package models
 
 type SearchResp struct {
-	Count int64          `json:"count"`
-	List  []SearchObject `json:"list"`
+	Count int64           `json:"count"`
+	List  []*SearchResult `json:"list"`
+}
+
+type SearchResult struct {
+	ObjectType string        `json:"object_type"`
+	Object     *SearchObject `json:"object"`
 }
 
 type SearchObject struct {
-	ID             string         `json:"id"`
-	Type           string         `json:"type"`
-	Title          string         `json:"title"`
-	Excerpt        string         `json:"excerpt"`
-	VoteCount      int            `json:"vote_count"`
-	AnswerCount    int            `json:"answer_count"`
-	Accepted       bool           `json:"accepted"`
-	CreatedAt      int64          `json:"created_at"`
-	UserInfo       *UserBasicInfo `json:"user_info"`
-	Tags           []TagItem      `json:"tags"`
-	QuestionID     string         `json:"question_id,omitempty"`
+	ID         string `json:"id"`
+	QuestionID string `json:"question_id"`
+	Title      string `json:"title"`
+	Excerpt    string `json:"excerpt"`
+	VoteCount  int    `json:"vote_count"`
+	AnswerCount int   `json:"answer_count"`
+	Accepted   bool   `json:"accepted"`
+	CreatedAt  int64  `json:"created_at"`
+	StatusStr  string `json:"status"`
 }
 
 type SearchReq struct {

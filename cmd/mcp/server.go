@@ -132,10 +132,13 @@ func handleQuestionSearch(ctx context.Context, cli *client.Client, req mcp.CallT
 		})
 		if err == nil && len(searchResult.List) > 0 {
 			for _, s := range searchResult.List {
+				if s.Object == nil {
+					continue
+				}
 				items = append(items, item{
-					ID: s.ID, Title: s.Title, AnswerCount: s.AnswerCount,
-					VoteCount: s.VoteCount,
-					CreatedAt: models.FormatTimestamp(s.CreatedAt).Format("2006-01-02"),
+					ID: s.Object.ID, Title: s.Object.Title, AnswerCount: s.Object.AnswerCount,
+					VoteCount: s.Object.VoteCount,
+					CreatedAt: models.FormatTimestamp(s.Object.CreatedAt).Format("2006-01-02"),
 				})
 			}
 		}
