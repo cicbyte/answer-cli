@@ -1,0 +1,119 @@
+package tui
+
+import (
+	"context"
+	"fmt"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/cicbyte/answer-cli/internal/client"
+	"github.com/cicbyte/answer-cli/internal/common"
+	"github.com/cicbyte/answer-cli/internal/models"
+)
+
+func loadQuestionsCmd(cli *client.Client, page, pageSize int, order string) tea.Cmd {
+	return func() tea.Msg {
+		resp, err := cli.Question.Page(context.Background(), &models.QuestionListReq{
+			Page: page, PageSize: pageSize, Order: order,
+		})
+		if err != nil {
+			return apiErrorMsg{err: err}
+		}
+		return questionsLoadedMsg{questions: resp.List, count: resp.Count, page: page}
+	}
+}
+
+func loadQuestionDetailCmd(cli *client.Client, id string) tea.Cmd {
+	return func() tea.Msg {
+		q, err := cli.Question.Get(context.Background(), id)
+		if err != nil {
+			return apiErrorMsg{err: err}
+		}
+		return questionDetailLoadedMsg{question: q}
+	}
+}
+
+func loadAnswersCmd(cli *client.Client, questionID string) tea.Cmd {
+	return func() tea.Msg {
+		resp, err := cli.Answer.Page(context.Background(), &models.AnswerListReq{
+			QuestionID: questionID, Page: 1, PageSize: 50,
+		})
+		if err != nil {
+			return apiErrorMsg{err: err}
+		}
+		return answersLoadedMsg{answers: resp.List, count: resp.Count}
+	}
+}
+
+func loadCommentsCmd(cli *client.Client, objectID string) tea.Cmd {
+	return func() tea.Msg {
+		resp, err := cli.Comment.Page(context.Background(), &models.CommentListReq{
+			ObjectID: objectID, Page: 1, PageSize: 50,
+		})
+		if err != nil {
+			return apiErrorMsg{err: err}
+		}
+		return commentsLoadedMsg{objectID: objectID, comments: resp.List}
+	}
+}
+
+func searchCmd(cli *client.Client, query string) tea.Cmd {
+	return func() tea.Msg {
+		resp, err := cli.Search.Search(context.Background(), &models.SearchReq{
+			Query: query, Page: 1, Size: 20, Order: "relevance",
+		})
+		if err != nil {
+			return apiErrorMsg{err: err}
+		}
+		return searchResultsMsg{results: resp.List, count: resp.Count, query: query}
+	}
+}
+
+func voteUpCmd(cli *client.Client, objectID string) tea.Cmd {
+	return func() tea.Msg {
+		err := cli.Vote.VoteUp(context.Background(), objectID)
+		return voteResultMsg{err: err}
+	}
+}
+
+func addAnswerCmd(cli *client.Client, questionID, content string) tea.Cmd {
+	return func() tea.Msg {
+		_, err := cli.Answer.Add(context.Background(), &models.AnswerAddReq{
+			QuestionID: questionID, Content: content,
+		})
+		return answerAddedMsg{err: err}
+	}
+}
+
+func addCommentCmd(cli *client.Client, objectID, text string) tea.Cmd {
+	return func() tea.Msg {
+		_, err := cli.Comment.Add(context.Background(), &models.CommentAddReq{
+			ObjectID: objectID, OriginalText: text,
+		})
+		return commentAddedMsg{err: err}
+	}
+}
+
+func checkAuthCmd(cli *client.Client) tea.Cmd {
+	return func() tea.Msg {
+		if cli.GetToken() == "" {
+			return authCheckedMsg{username: ""}
+		}
+		auth := client.NewAuthService(cli)
+		user, err := auth.GetCurrentUser(context.Background())
+		if err != nil {
+			return authCheckedMsg{username: ""}
+		}
+		return authCheckedMsg{username: user.DisplayName}
+	}
+}
+
+func NewTUIClient() (*client.Client, error) {
+	cfg := common.GetAppConfig()
+	if cfg.GetServerURL() == "" {
+		return nil, fmt.Errorf("server not configured, run: answer-cli config set server.base_url <url>")
+	}
+	return client.NewClient(&client.Config{
+		BaseURL: cfg.GetServerURL(),
+		Token:   cfg.GetServerToken(),
+	}), nil
+}

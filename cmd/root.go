@@ -18,6 +18,7 @@ import (
 	"github.com/cicbyte/answer-cli/cmd/vote"
 	"github.com/cicbyte/answer-cli/internal/common"
 	"github.com/cicbyte/answer-cli/internal/log"
+	"github.com/cicbyte/answer-cli/internal/tui"
 	"github.com/cicbyte/answer-cli/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -37,6 +38,13 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
+	if len(os.Args) == 1 {
+		if err := tui.RunTUI(); err != nil {
+			fmt.Fprintf(os.Stderr, "TUI 启动失败: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
