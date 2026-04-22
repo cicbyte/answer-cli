@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/cicbyte/answer-cli/internal/client"
 	"github.com/cicbyte/answer-cli/internal/models"
 	"github.com/cicbyte/answer-cli/internal/output"
 	"github.com/spf13/cobra"
@@ -47,7 +48,7 @@ func getListCommand() *cobra.Command {
 func runList(cmd *cobra.Command, args []string) {
 	cli, err := getClient()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "错误: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -60,7 +61,11 @@ func runList(cmd *cobra.Command, args []string) {
 
 	resp, err := cli.Question.Page(context.Background(), req)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		if client.IsNotFoundError(err) && questionListPage > 1 {
+			fmt.Printf("暂无数据（第 %d 页超出范围）\n", questionListPage)
+		} else {
+			fmt.Fprintf(os.Stderr, "错误: %v\n", err)
+		}
 		os.Exit(1)
 	}
 
@@ -70,11 +75,11 @@ func runList(cmd *cobra.Command, args []string) {
 	}
 
 	if len(resp.List) == 0 {
-		fmt.Println("No questions found.")
+		fmt.Println("暂无问题")
 		return
 	}
 
-	headers := []string{"ID", "Title", "Answers", "Votes", "Created", "Tags"}
+	headers := []string{"ID", "标题", "回答数", "投票数", "创建时间", "标签"}
 	var rows [][]string
 	for _, q := range resp.List {
 		tagNames := make([]string, len(q.Tags))
@@ -93,5 +98,5 @@ func runList(cmd *cobra.Command, args []string) {
 	}
 
 	output.PrintTable(headers, rows)
-	fmt.Printf("\nTotal: %d (page %d, %d per page)\n", resp.Count, questionListPage, questionListSize)
+	fmt.Printf("\n共 %d 条（第 %d 页，每页 %d 条）\n", resp.Count, questionListPage, questionListSize)
 }

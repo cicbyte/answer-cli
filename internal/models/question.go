@@ -42,8 +42,8 @@ type QuestionInfoResp struct {
 	AcceptedAnswerID string         `json:"accepted_answer_id"`
 	LastAnswerID     string         `json:"last_answer_id"`
 	HotScore         int            `json:"hot_score"`
-	CreatedAt        int64          `json:"created_at"`
-	UpdatedAt        int64          `json:"updated_at"`
+	CreatedAt        int64          `json:"create_time"`
+	UpdatedAt        int64          `json:"update_time"`
 	UserInfo         *UserBasicInfo `json:"user_info"`
 	Tags             []TagItem      `json:"tags"`
 }
