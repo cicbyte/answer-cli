@@ -14,9 +14,9 @@ type TagItem struct {
 }
 
 type UserBasicInfo struct {
-	ID          string `json:"id"`
-	Username    string `json:"username"`
-	DisplayName string `json:"display_name"`
-	Avatar      string `json:"avatar"`
-	Rank        int    `json:"rank"`
+	ID          string      `json:"id"`
+	Username    string      `json:"username"`
+	DisplayName string      `json:"display_name"`
+	Avatar      *AvatarInfo `json:"avatar"`
+	Rank        int         `json:"rank"`
 }

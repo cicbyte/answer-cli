@@ -13,7 +13,6 @@ import (
 var (
 	answerListPage int
 	answerListSize int
-	answerListJSON bool
 )
 
 func getListCommand() *cobra.Command {
@@ -25,15 +24,15 @@ func getListCommand() *cobra.Command {
 
 示例:
   answer-cli answer list 123
-  answer-cli answer list 123 --page=2 --size=10
-  answer-cli answer list 123 --json`,
+  answer-cli answer list 123 --page=2
+  answer-cli answer list 123 --format json
+  answer-cli answer list 123 --format jsonl`,
 		Args: cobra.ExactArgs(1),
 		Run:  runList,
 	}
 
 	cmd.Flags().IntVarP(&answerListPage, "page", "p", 1, "页码")
 	cmd.Flags().IntVarP(&answerListSize, "size", "s", 20, "每页数量")
-	cmd.Flags().BoolVar(&answerListJSON, "json", false, "以 JSON 格式输出")
 
 	return cmd
 }
@@ -43,56 +42,64 @@ func runList(cmd *cobra.Command, args []string) {
 
 	cli, err := getClient()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "错误: %v\n", err)
 		os.Exit(1)
 	}
 
 	req := &models.AnswerListReq{
-		QuestionID: questionID,
-		Page:       answerListPage,
-		PageSize:   answerListSize,
+		QuestionID: questionID, Page: answerListPage, PageSize: answerListSize,
 	}
 
 	resp, err := cli.Answer.Page(context.Background(), req)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "错误: %v\n", err)
 		os.Exit(1)
 	}
 
-	if answerListJSON || output.GetOutputFormat("") == "json" {
-		output.PrintJSON(resp)
+	if output.IsJSON("") {
+		items := make([]map[string]any, 0, len(resp.List))
+		for _, a := range resp.List {
+			author := ""
+			if a.UserInfo != nil {
+				author = a.UserInfo.DisplayName
+			}
+			item := map[string]any{
+				"id": a.ID, "author": author,
+				"accepted": a.Accepted == 1,
+				"created_at": models.FormatTimestamp(a.CreatedAt).Format("2006-01-02"),
+			}
+			items = append(items, item)
+		}
+		if output.IsJSONL("") {
+			output.PrintJSONL(items)
+		} else {
+			output.PrintJSON(map[string]any{"count": resp.Count, "list": items})
+		}
 		return
 	}
 
 	if len(resp.List) == 0 {
-		fmt.Println("No answers found.")
+		fmt.Println("暂无回答")
 		return
 	}
 
-	headers := []string{"ID", "Author", "Votes", "Comments", "Accepted", "Created"}
-	var rows [][]string
-	for _, a := range resp.List {
-		accepted := ""
-		if a.Accepted == 1 {
-			accepted = "Yes"
-		}
-
+	items := make([]output.Item, len(resp.List))
+	for i, a := range resp.List {
 		author := ""
 		if a.UserInfo != nil {
 			author = a.UserInfo.DisplayName
 		}
-
-		created := models.FormatTimestamp(a.CreatedAt).Format("2006-01-02 15:04")
-		rows = append(rows, []string{
-			a.ID,
-			author,
-			fmt.Sprintf("%d", a.VoteCount),
-			fmt.Sprintf("%d", a.CommentCount),
-			accepted,
-			created,
-		})
+		date := models.FormatTimestamp(a.CreatedAt).Format("01-02")
+		accepted := ""
+		if a.Accepted == 1 {
+			accepted = " ✓"
+		}
+		items[i] = output.Item{
+			Title:    a.ID + accepted,
+			Subtitle: fmt.Sprintf("%s  ↑%d  💬%d  %s", date, a.VoteCount, a.CommentCount, author),
+		}
 	}
 
-	output.PrintTable(headers, rows)
-	fmt.Printf("\nTotal: %d (page %d, %d per page)\n", resp.Count, answerListPage, answerListSize)
+	footer := fmt.Sprintf("共 %d 条（第 %d 页）", resp.Count, answerListPage)
+	output.PrintItems(items, footer)
 }

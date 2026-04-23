@@ -13,9 +13,10 @@ type AIService struct {
 	model     string
 	baseURL   string
 	apiClient *client.Client
+	serverURL string
 }
 
-func NewAIService(provider, baseURL, model, apiKey string, apiClient *client.Client) *AIService {
+func NewAIService(provider, baseURL, model, apiKey string, apiClient *client.Client, serverURL string) *AIService {
 	if provider == "ollama" {
 		if !strings.HasSuffix(baseURL, "/v1") {
 			baseURL = strings.TrimSuffix(baseURL, "/") + "/v1"
@@ -30,6 +31,7 @@ func NewAIService(provider, baseURL, model, apiKey string, apiClient *client.Cli
 		model:     model,
 		baseURL:   baseURL,
 		apiClient: apiClient,
+		serverURL: serverURL,
 	}
 }
 
@@ -38,7 +40,15 @@ type ChatMessage struct {
 	Content string
 }
 
-type StreamCallback func(text string)
+type StreamEvent struct {
+	Type             string
+	Tool             string
+	Content          string
+	PromptTokens     int
+	CompletionTokens int
+}
+
+type StreamCallback func(StreamEvent)
 
 type AskResponse struct {
 	Answer           string
@@ -48,12 +58,12 @@ type AskResponse struct {
 }
 
 func (s *AIService) AskStream(ctx context.Context, question string, history []ChatMessage, cb StreamCallback) error {
-	agent := NewAgent(s.llmClient, s.apiClient, s.model)
+	agent := NewAgent(s.llmClient, s.apiClient, s.model, s.serverURL)
 	return agent.AskStream(ctx, question, history, cb)
 }
 
 func (s *AIService) Ask(ctx context.Context, question string, history []ChatMessage) (*AskResponse, error) {
-	agent := NewAgent(s.llmClient, s.apiClient, s.model)
+	agent := NewAgent(s.llmClient, s.apiClient, s.model, s.serverURL)
 	result, err := agent.Ask(ctx, question, history)
 	if err != nil {
 		return nil, err

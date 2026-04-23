@@ -10,10 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	userInfoUsername string
-	userInfoJSON     bool
-)
+var userInfoUsername string
 
 var infoCmd = &cobra.Command{
 	Use:   "info",
@@ -23,13 +20,12 @@ var infoCmd = &cobra.Command{
 Examples:
   answer-cli user info
   answer-cli user info --username=john
-  answer-cli user info --json`,
+  answer-cli user info --format json`,
 	Run: runInfo,
 }
 
 func init() {
 	infoCmd.Flags().StringVarP(&userInfoUsername, "username", "u", "", "Username (default: current user)")
-	infoCmd.Flags().BoolVar(&userInfoJSON, "json", false, "Output in JSON format")
 }
 
 func runInfo(cmd *cobra.Command, args []string) {
@@ -39,6 +35,7 @@ func runInfo(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	var u *models.UserBasicInfo
 	if userInfoUsername != "" {
 		users, err := cli.User.SearchUsers(context.Background(), userInfoUsername)
 		if err != nil {
@@ -49,24 +46,21 @@ func runInfo(cmd *cobra.Command, args []string) {
 			fmt.Fprintf(os.Stderr, "User '%s' not found.\n", userInfoUsername)
 			os.Exit(1)
 		}
-		u := users[0]
-		if userInfoJSON || output.GetOutputFormat("") == "json" {
-			output.PrintJSON(u)
-			return
-		}
-		printUserBasicInfo(u)
+		u = users[0]
 	} else {
-		u, err := cli.User.GetByUsername(context.Background())
+		var err error
+		u, err = cli.User.GetByUsername(context.Background())
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
-		if userInfoJSON || output.GetOutputFormat("") == "json" {
-			output.PrintJSON(u)
-			return
-		}
-		printUserBasicInfo(u)
 	}
+
+	if output.IsJSON("") {
+		output.PrintJSON(u)
+		return
+	}
+	printUserBasicInfo(u)
 }
 
 func printUserBasicInfo(u *models.UserBasicInfo) {

@@ -19,9 +19,12 @@ import (
 	"github.com/cicbyte/answer-cli/internal/common"
 	"github.com/cicbyte/answer-cli/internal/log"
 	"github.com/cicbyte/answer-cli/internal/tui"
+	"github.com/cicbyte/answer-cli/internal/output"
 	"github.com/cicbyte/answer-cli/internal/utils"
 	"github.com/spf13/cobra"
 )
+
+var globalFormat string
 
 var rootCmd = &cobra.Command{
 	Use:   "answer-cli",
@@ -73,4 +76,10 @@ func init() {
 	rootCmd.AddCommand(vote.GetVoteCommand())
 	rootCmd.AddCommand(mcp.GetMcpCommand())
 	rootCmd.AddCommand(chat.GetChatCommand())
+
+	rootCmd.PersistentFlags().StringVar(&globalFormat, "format", "", "输出格式 (json|jsonl|pretty)")
+	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		output.SetFormat(globalFormat)
+		return nil
+	}
 }

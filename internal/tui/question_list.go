@@ -102,7 +102,7 @@ func (m appModel) viewQuestionList() string {
 		header = styleTitle.Render(fmt.Sprintf("搜索: %s", m.searchQuery))
 	}
 	if !m.searchActive {
-		header += styleMuted.Render(fmt.Sprintf("  (第 %d 页, 共 %d 条)", m.qPage, m.qCount))
+		header += styleMuted.Render(fmt.Sprintf("  (%s/%s)", m.qOrder, formatCount(m.qCount)))
 	}
 	lines = append(lines, header)
 
@@ -120,22 +120,35 @@ func (m appModel) viewQuestionList() string {
 		return strings.Join(lines, "\n")
 	}
 
-	availW := m.width
-	if availW <= 0 {
-		availW = 80
+	w := m.width
+	if w <= 0 {
+		w = 80
 	}
-	availW -= 4
+	contentW := w - 4
 
 	for i, q := range m.questions {
 		cursor := "  "
-		if i == m.qCursor {
-			cursor = styleCursor.Render("> ")
+		selected := i == m.qCursor
+		if selected {
+			cursor = styleCursor.Render("▸ ")
 		}
 
 		title := q.Title
 		titleRunes := []rune(title)
-		if len(titleRunes) > availW-30 {
-			title = string(titleRunes[:availW-30]) + "..."
+		titleMax := contentW - 2
+		if len(titleRunes) > titleMax {
+			title = string(titleRunes[:titleMax-3]) + "..."
+		}
+
+		if selected {
+			title = styleTitle.Render(title)
+		}
+
+		line1 := cursor + title
+
+		tags := ""
+		for _, t := range q.Tags {
+			tags += styleTag.Render(t.DisplayName) + " "
 		}
 
 		date := models.FormatTimestamp(q.CreatedAt).Format("01-02")
@@ -144,22 +157,25 @@ func (m appModel) viewQuestionList() string {
 			author = q.UserInfo.DisplayName
 		}
 
-		vote := styleVote.Render(fmt.Sprintf("%d", q.VoteCount))
-		ansCount := fmt.Sprintf("%d", q.AnswerCount)
-		tags := ""
-		for _, t := range q.Tags {
-			tags += styleTag.Render(t.DisplayName)
-		}
+		meta := styleMuted.Render(fmt.Sprintf("%s  %s  %s", date, author, tags))
+		line2 := "  " + meta
 
-		line := fmt.Sprintf("%s%s %s  答案:%s  %s %s %s",
-			cursor, title, vote, ansCount, tags, date, styleDim.Render(author))
+		lines = append(lines, line1, line2)
 
-		lineRunes := []rune(line)
-		if len(lineRunes) > availW {
-			line = string(lineRunes[:availW]) + "..."
+		if i < len(m.questions)-1 {
+			lines = append(lines, styleDim.Render(strings.Repeat("─", contentW)))
 		}
-		lines = append(lines, line)
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+func formatCount(n int64) string {
+	if n >= 10000 {
+		return fmt.Sprintf("%.1fw", float64(n)/10000)
+	}
+	if n >= 1000 {
+		return fmt.Sprintf("%.1fk", float64(n)/1000)
+	}
+	return fmt.Sprintf("%d", n)
 }

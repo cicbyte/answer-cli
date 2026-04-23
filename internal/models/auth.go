@@ -1,13 +1,15 @@
 package models
 
+import "encoding/json"
+
 type LoginResponse struct {
-	AccessToken string `json:"access_token"`
-	ID          string `json:"id"`
-	Username    string `json:"username"`
-	EMail       string `json:"e_mail"`
-	DisplayName string `json:"display_name"`
-	Avatar      string `json:"avatar"`
-	Rank        int    `json:"rank"`
+	AccessToken string          `json:"access_token"`
+	ID          string          `json:"id"`
+	Username    string          `json:"username"`
+	EMail       string          `json:"e_mail"`
+	DisplayName string          `json:"display_name"`
+	Avatar      json.RawMessage `json:"avatar"`
+	Rank        int             `json:"rank"`
 }
 
 type AvatarInfo struct {

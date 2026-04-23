@@ -13,18 +13,17 @@ import (
 var (
 	commentListPage int
 	commentListSize int
-	commentListJSON bool
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list <object-id>",
-	Short: "List comments for an object",
+	Use:     "list <object-id>",
+	Short:   "List comments for an object",
 	Long: `List comments for a question or answer.
 
 Examples:
   answer-cli comment list 123
   answer-cli comment list 123 --page=2 --size=10
-  answer-cli comment list 123 --json`,
+  answer-cli comment list 123 --format json`,
 	Args: cobra.ExactArgs(1),
 	Run:  runList,
 }
@@ -32,7 +31,6 @@ Examples:
 func init() {
 	listCmd.Flags().IntVarP(&commentListPage, "page", "p", 1, "Page number")
 	listCmd.Flags().IntVarP(&commentListSize, "size", "s", 20, "Page size")
-	listCmd.Flags().BoolVar(&commentListJSON, "json", false, "Output in JSON format")
 }
 
 func runList(cmd *cobra.Command, args []string) {
@@ -56,7 +54,7 @@ func runList(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if commentListJSON || output.GetOutputFormat("") == "json" {
+	if output.IsJSON("") {
 		output.PrintJSON(resp)
 		return
 	}

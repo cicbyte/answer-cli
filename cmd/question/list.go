@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/cicbyte/answer-cli/internal/client"
 	"github.com/cicbyte/answer-cli/internal/models"
@@ -18,44 +17,37 @@ var (
 	questionListTag     string
 	questionListPage    int
 	questionListSize    int
-	questionListJSON    bool
 )
 
 func getListCommand() *cobra.Command {
 	return NewListAsSearch()
 }
 
-// NewListAsSearch 导出 list 命令，供 search 子命令复用
 func NewListAsSearch() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list [keyword]",
 		Short:   "列出问题，支持关键词搜索",
 		Aliases: []string{"ls", "search"},
 		Long: `列出问题列表，支持排序、标签过滤和关键词搜索。
-指定关键词时走全文搜索，否则走列表过滤。
 
 示例:
   answer-cli question list
   answer-cli question list "chrome"
-  answer-cli question list --order=hot
-  answer-cli question list --tag=go
-  answer-cli question list "golang" --order=newest --page=2
-  answer-cli question list --json`,
+  answer-cli question list --format json
+  answer-cli question list --format jsonl`,
 		Run: runList,
 	}
 
 	cmd.Flags().StringVarP(&questionListKeyword, "keyword", "k", "", "搜索关键词")
-	cmd.Flags().StringVar(&questionListOrder, "order", "newest", "排序方式 (newest|active|hot|score|unanswered|relevance)")
+	cmd.Flags().StringVar(&questionListOrder, "order", "newest", "排序 (newest|active|hot|score|unanswered|relevance)")
 	cmd.Flags().StringVarP(&questionListTag, "tag", "t", "", "按标签过滤")
 	cmd.Flags().IntVarP(&questionListPage, "page", "p", 1, "页码")
 	cmd.Flags().IntVarP(&questionListSize, "size", "s", 20, "每页数量")
-	cmd.Flags().BoolVar(&questionListJSON, "json", false, "以 JSON 格式输出")
 
 	return cmd
 }
 
 func runList(cmd *cobra.Command, args []string) {
-	// 位置参数也可以作为关键词
 	keyword := questionListKeyword
 	if len(args) > 0 && keyword == "" {
 		keyword = args[0]
@@ -76,10 +68,8 @@ func runList(cmd *cobra.Command, args []string) {
 
 func runPage(cli *client.Client) {
 	req := &models.QuestionListReq{
-		Page:     questionListPage,
-		PageSize: questionListSize,
-		Order:    questionListOrder,
-		Tag:      questionListTag,
+		Page: questionListPage, PageSize: questionListSize,
+		Order: questionListOrder, Tag: questionListTag,
 	}
 
 	resp, err := cli.Question.Page(context.Background(), req)
@@ -92,8 +82,13 @@ func runPage(cli *client.Client) {
 		os.Exit(1)
 	}
 
-	if questionListJSON || output.GetOutputFormat("") == "json" {
-		output.PrintJSON(resp)
+	if output.IsJSON("") {
+		items := buildQuestionItems(resp.List)
+		if output.IsJSONL("") {
+			output.PrintJSONL(items)
+		} else {
+			output.PrintJSON(map[string]any{"count": resp.Count, "list": items})
+		}
 		return
 	}
 
@@ -102,26 +97,25 @@ func runPage(cli *client.Client) {
 		return
 	}
 
-	headers := []string{"ID", "标题", "回答数", "投票数", "创建时间", "标签"}
-	var rows [][]string
-	for _, q := range resp.List {
-		tagNames := make([]string, len(q.Tags))
-		for i, tag := range q.Tags {
-			tagNames[i] = tag.DisplayName
+	displayItems := make([]output.Item, len(resp.List))
+	for i, q := range resp.List {
+		author := ""
+		if q.UserInfo != nil {
+			author = q.UserInfo.DisplayName
 		}
-		created := models.FormatTimestamp(q.CreatedAt).Format("2006-01-02 15:04")
-		rows = append(rows, []string{
-			q.ID,
-			output.Truncate(q.Title, 50),
-			fmt.Sprintf("%d", q.AnswerCount),
-			fmt.Sprintf("%d", q.VoteCount),
-			created,
-			strings.Join(tagNames, ","),
-		})
+		date := models.FormatTimestamp(q.CreatedAt).Format("01-02")
+		tags := make([]string, len(q.Tags))
+		for j, t := range q.Tags {
+			tags[j] = t.DisplayName
+		}
+		displayItems[i] = output.Item{
+			Title:    q.Title,
+			Subtitle: fmt.Sprintf("%s  %s  ↑%d  💬%d", date, author, q.VoteCount, q.AnswerCount),
+			Tags:     tags,
+		}
 	}
 
-	output.PrintTable(headers, rows)
-	fmt.Printf("\n共 %d 条（第 %d 页，每页 %d 条）\n", resp.Count, questionListPage, questionListSize)
+	output.PrintItems(displayItems, fmt.Sprintf("共 %d 条（第 %d 页）", resp.Count, questionListPage))
 }
 
 func runSearch(cli *client.Client, keyword string) {
@@ -131,18 +125,31 @@ func runSearch(cli *client.Client, keyword string) {
 	}
 
 	resp, err := cli.Search.Search(context.Background(), &models.SearchReq{
-		Query: keyword,
-		Page:  questionListPage,
-		Size:  questionListSize,
-		Order: order,
+		Query: keyword, Page: questionListPage, Size: questionListSize, Order: order,
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "错误: %v\n", err)
 		os.Exit(1)
 	}
 
-	if questionListJSON || output.GetOutputFormat("") == "json" {
-		output.PrintJSON(resp)
+	if output.IsJSON("") {
+		items := make([]map[string]any, 0, len(resp.List))
+		for _, sr := range resp.List {
+			if sr.Object == nil {
+				continue
+			}
+			obj := sr.Object
+			items = append(items, map[string]any{
+				"id": obj.ID, "title": obj.Title,
+				"answers": obj.AnswerCount,
+				"created_at": models.FormatTimestamp(obj.CreatedAt).Format("2006-01-02"),
+			})
+		}
+		if output.IsJSONL("") {
+			output.PrintJSONL(items)
+		} else {
+			output.PrintJSON(map[string]any{"count": resp.Count, "list": items})
+		}
 		return
 	}
 
@@ -151,24 +158,41 @@ func runSearch(cli *client.Client, keyword string) {
 		return
 	}
 
-	headers := []string{"ID", "类型", "标题", "回答数", "投票数", "创建时间"}
-	var rows [][]string
-	for _, item := range resp.List {
-		if item.Object == nil {
+	displayItems := make([]output.Item, 0, len(resp.List))
+	for _, sr := range resp.List {
+		if sr.Object == nil {
 			continue
 		}
-		obj := item.Object
-		created := models.FormatTimestamp(obj.CreatedAt).Format("2006-01-02 15:04")
-		rows = append(rows, []string{
-			obj.ID,
-			item.ObjectType,
-			output.Truncate(obj.Title, 50),
-			fmt.Sprintf("%d", obj.AnswerCount),
-			fmt.Sprintf("%d", obj.VoteCount),
-			created,
+		obj := sr.Object
+		date := models.FormatTimestamp(obj.CreatedAt).Format("01-02")
+		displayItems = append(displayItems, output.Item{
+			Title:    obj.Title,
+			Subtitle: fmt.Sprintf("%s  ↑%d  💬%d", date, obj.VoteCount, obj.AnswerCount),
 		})
 	}
 
-	output.PrintTable(headers, rows)
-	fmt.Printf("\n共 %d 条（第 %d 页，每页 %d 条）\n", resp.Count, questionListPage, questionListSize)
+	output.PrintItems(displayItems, fmt.Sprintf("共 %d 条", resp.Count))
+}
+
+func buildQuestionItems(list []models.QuestionListItem) []map[string]any {
+	items := make([]map[string]any, 0, len(list))
+	for _, q := range list {
+		item := map[string]any{
+			"id": q.ID, "title": q.Title,
+			"answers": q.AnswerCount,
+			"created_at": models.FormatTimestamp(q.CreatedAt).Format("2006-01-02"),
+		}
+		if q.UserInfo != nil {
+			item["author"] = q.UserInfo.DisplayName
+		}
+		if len(q.Tags) > 0 {
+			tags := make([]string, len(q.Tags))
+			for j, t := range q.Tags {
+				tags[j] = t.DisplayName
+			}
+			item["tags"] = tags
+		}
+		items = append(items, item)
+	}
+	return items
 }

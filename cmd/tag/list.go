@@ -14,7 +14,6 @@ var (
 	tagListOrder string
 	tagListPage  int
 	tagListSize  int
-	tagListJSON  bool
 )
 
 var listCmd = &cobra.Command{
@@ -25,8 +24,7 @@ var listCmd = &cobra.Command{
 Examples:
   answer-cli tag list
   answer-cli tag list --order=popular
-  answer-cli tag list --order=name --page=2 --size=10
-  answer-cli tag list --json`,
+  answer-cli tag list --order=name --page=2 --size=10`,
 	Run: runList,
 }
 
@@ -34,7 +32,6 @@ func init() {
 	listCmd.Flags().StringVar(&tagListOrder, "order", "popular", "Sort order (popular|name|newest)")
 	listCmd.Flags().IntVarP(&tagListPage, "page", "p", 1, "Page number")
 	listCmd.Flags().IntVarP(&tagListSize, "size", "s", 20, "Page size")
-	listCmd.Flags().BoolVar(&tagListJSON, "json", false, "Output in JSON format")
 }
 
 func runList(cmd *cobra.Command, args []string) {
@@ -56,7 +53,7 @@ func runList(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if tagListJSON || output.GetOutputFormat("") == "json" {
+	if output.IsJSON("") {
 		output.PrintJSON(resp)
 		return
 	}

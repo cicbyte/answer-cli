@@ -14,7 +14,6 @@ var (
 	notificationListType string
 	notificationListPage int
 	notificationListSize int
-	notificationListJSON bool
 )
 
 var listCmd = &cobra.Command{
@@ -33,7 +32,6 @@ func init() {
 	listCmd.Flags().StringVar(&notificationListType, "type", "inbox", "Notification type (inbox|achievement)")
 	listCmd.Flags().IntVarP(&notificationListPage, "page", "p", 1, "Page number")
 	listCmd.Flags().IntVarP(&notificationListSize, "size", "s", 20, "Page size")
-	listCmd.Flags().BoolVar(&notificationListJSON, "json", false, "Output in JSON format")
 }
 
 func runList(cmd *cobra.Command, args []string) {
@@ -44,8 +42,8 @@ func runList(cmd *cobra.Command, args []string) {
 	}
 
 	req := &models.NotificationListReq{
-		Page:     notificationListPage,
-		Size:     notificationListSize,
+		Page:      notificationListPage,
+		Size:      notificationListSize,
 		InboxType: notificationListType,
 	}
 
@@ -55,7 +53,7 @@ func runList(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if notificationListJSON || output.GetOutputFormat("") == "json" {
+	if output.IsJSON("") {
 		output.PrintJSON(resp)
 		return
 	}

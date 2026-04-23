@@ -5,7 +5,7 @@ type UserDetailResp struct {
 	ID          string `json:"id"`
 	Username    string `json:"username"`
 	DisplayName string `json:"display_name"`
-	Avatar      string `json:"avatar"`
+	Avatar      *AvatarInfo `json:"avatar"`
 	Rank        int    `json:"rank"`
 	Bio         string `json:"bio"`
 	Website     string `json:"website"`
