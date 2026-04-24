@@ -11,17 +11,6 @@ import (
 
 func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.MouseMsg:
-		switch msg.Type {
-		case tea.MouseWheelUp:
-			if m.detailScroll > 0 {
-				m.detailScroll--
-			}
-			return m, nil
-		case tea.MouseWheelDown:
-			m.detailScroll++
-			return m, nil
-		}
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
@@ -31,14 +20,7 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.question = nil
 			m.answers = nil
 			m.comments = make(map[string][]models.CommentInfo)
-			m.detailScroll = 0
 			return m, loadQuestionsCmd(m.cli, m.qPage, m.qPageSize, m.qOrder)
-		case "up", "k":
-			if m.detailScroll > 0 {
-				m.detailScroll--
-			}
-		case "down", "j":
-			m.detailScroll++
 		case "v":
 			if m.question != nil {
 				return m, voteUpCmd(m.cli, m.question.ID)
@@ -62,6 +44,48 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, ta.Focus()
 			}
 		}
+	case tea.MouseMsg:
+		switch {
+		case msg.Action == tea.MouseActionPress && msg.Button == tea.MouseButtonWheelUp:
+			m.viewport.LineUp(1)
+		case msg.Action == tea.MouseActionPress && msg.Button == tea.MouseButtonWheelDown:
+			m.viewport.LineDown(1)
+		}
+		return m, nil
+	case tea.WindowSizeMsg:
+		m.viewport.Width = msg.Width
+		m.viewport.Height = msg.Height
+	}
+
+	var cmds []tea.Cmd
+
+	if qm, ok := msg.(questionDetailLoadedMsg); ok {
+		m.question = qm.question
+		m.dLoading = false
+		m.detailContent = m.buildDetailContent()
+		m.viewport.SetContent(m.detailContent)
+		m.viewport.GotoTop()
+		cmds = append(cmds, loadAnswersCmd(m.cli, qm.question.ID))
+		if qm.question.ID != "" {
+			cmds = append(cmds, loadCommentsCmd(m.cli, qm.question.ID))
+		}
+	} else if am, ok := msg.(answersLoadedMsg); ok {
+		m.answers = am.answers
+		m.detailContent = m.buildDetailContent()
+		m.viewport.SetContent(m.detailContent)
+		for _, a := range am.answers {
+			if a.CommentCount > 0 {
+				cmds = append(cmds, loadCommentsCmd(m.cli, a.ID))
+			}
+		}
+	} else if cm, ok := msg.(commentsLoadedMsg); ok {
+		m.comments[cm.objectID] = cm.comments
+		m.detailContent = m.buildDetailContent()
+		m.viewport.SetContent(m.detailContent)
+	}
+
+	if len(cmds) > 0 {
+		return m, tea.Batch(cmds...)
 	}
 	return m, nil
 }
@@ -75,70 +99,12 @@ func (m appModel) viewQuestionDetail() string {
 	}
 
 	header := m.renderDetailHeader()
-	body := m.renderDetailBody()
-	bodyLines := strings.Split(body, "\n")
+	body := m.viewport.View()
 
-	// 可用高度 = 终端高度 - 头部行数 - 状态栏(1)
-	headerLines := strings.Count(header, "\n") + 1
-	viewH := m.height - headerLines - 1
-	if viewH < 1 {
-		viewH = 1
-	}
-
-	// 限制滚动范围
-	maxScroll := max(len(bodyLines)-viewH, 0)
-	if m.detailScroll > maxScroll {
-		m.detailScroll = maxScroll
-	}
-	if m.detailScroll < 0 {
-		m.detailScroll = 0
-	}
-
-	if m.detailScroll >= len(bodyLines) {
-		m.detailScroll = len(bodyLines) - 1
-	}
-
-	visible := bodyLines[m.detailScroll:]
-	if len(visible) > viewH {
-		visible = visible[:viewH]
-	}
-
-	return header + strings.Join(visible, "\n")
+	return header + "\n" + body
 }
 
-func (m appModel) renderDetailHeader() string {
-	var b strings.Builder
-	w := maxWidth(m.width)
-
-	b.WriteString(styleTitle.Render(m.question.Title))
-	b.WriteString("\n")
-
-	author := "匿名"
-	if m.question.UserInfo != nil {
-		author = m.question.UserInfo.DisplayName
-	}
-	date := models.FormatTimestamp(m.question.CreatedAt).Format("2006-01-02 15:04")
-	votes := styleVote.Render(fmt.Sprintf("↑%d", m.question.VoteCount))
-
-	meta := fmt.Sprintf("%s · %s · %s · 浏览%d · %s", author, date, votes, m.question.ViewCount, statusLabel(m.question.Status))
-	if m.question.AcceptedAnswerID != "" {
-		meta += " · " + styleAccepted.Render("✓ 已采纳")
-	}
-	b.WriteString(styleMuted.Render(meta))
-
-	if len(m.question.Tags) > 0 {
-		b.WriteString("\n")
-		for _, t := range m.question.Tags {
-			b.WriteString(" " + styleTag.Render(t.DisplayName))
-		}
-	}
-	b.WriteString("\n")
-	b.WriteString(styleSeparator.Render(strings.Repeat("─", w)))
-
-	return b.String()
-}
-
-func (m appModel) renderDetailBody() string {
+func (m appModel) buildDetailContent() string {
 	if m.question == nil {
 		return ""
 	}
@@ -146,11 +112,8 @@ func (m appModel) renderDetailBody() string {
 	var b strings.Builder
 	w := maxWidth(m.width)
 
-	// 问题内容
-	b.WriteString("\n")
 	b.WriteString(renderMarkdown(m.question.Content, w))
 
-	// 回答区
 	if len(m.answers) == 0 {
 		b.WriteString("\n\n")
 		b.WriteString(styleSeparator.Render(strings.Repeat("─", w)))
@@ -204,7 +167,6 @@ func (m appModel) renderDetailBody() string {
 		}
 	}
 
-	// 问题评论
 	qComments := m.comments[m.question.ID]
 	if len(qComments) > 0 {
 		b.WriteString("\n\n")
@@ -222,6 +184,38 @@ func (m appModel) renderDetailBody() string {
 			b.WriteString("\n")
 		}
 	}
+
+	return b.String()
+}
+
+func (m appModel) renderDetailHeader() string {
+	var b strings.Builder
+	w := maxWidth(m.width)
+
+	b.WriteString(styleTitle.Render(m.question.Title))
+	b.WriteString("\n")
+
+	author := "匿名"
+	if m.question.UserInfo != nil {
+		author = m.question.UserInfo.DisplayName
+	}
+	date := models.FormatTimestamp(m.question.CreatedAt).Format("2006-01-02 15:04")
+	votes := styleVote.Render(fmt.Sprintf("↑%d", m.question.VoteCount))
+
+	meta := fmt.Sprintf("%s · %s · %s · 浏览%d · %s", author, date, votes, m.question.ViewCount, statusLabel(m.question.Status))
+	if m.question.AcceptedAnswerID != "" {
+		meta += " · " + styleAccepted.Render("✓ 已采纳")
+	}
+	b.WriteString(styleMuted.Render(meta))
+
+	if len(m.question.Tags) > 0 {
+		b.WriteString("\n")
+		for _, t := range m.question.Tags {
+			b.WriteString(" " + styleTag.Render(t.DisplayName))
+		}
+	}
+	b.WriteString("\n")
+	b.WriteString(styleSeparator.Render(strings.Repeat("─", w)))
 
 	return b.String()
 }

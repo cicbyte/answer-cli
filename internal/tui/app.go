@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cicbyte/answer-cli/internal/client"
 	"github.com/cicbyte/answer-cli/internal/models"
@@ -42,11 +43,12 @@ type appModel struct {
 	searchActive bool
 
 	// Detail state
-	question     *models.QuestionInfoResp
-	answers      []models.AnswerInfo
-	comments     map[string][]models.CommentInfo
-	dLoading     bool
-	detailScroll  int
+	question      *models.QuestionInfoResp
+	answers       []models.AnswerInfo
+	comments      map[string][]models.CommentInfo
+	dLoading      bool
+	viewport      viewport.Model
+	detailContent string
 
 	// Editor state
 	editorActive bool
@@ -74,6 +76,7 @@ func NewAppModel(cli *client.Client) appModel {
 		qOrder:      "newest",
 		comments:    make(map[string][]models.CommentInfo),
 		searchInput: si,
+		viewport:    viewport.New(0, 0),
 	}
 }
 
@@ -82,10 +85,15 @@ func (m appModel) Init() tea.Cmd {
 }
 
 func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Global handlers
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		if m.activeView == viewQuestionDetail {
+			m.viewport.Width = msg.Width
+			m.viewport.Height = msg.Height
+		}
 		return m, nil
 
 	case tea.KeyMsg:
@@ -117,99 +125,20 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.username = msg.username
 		return m, nil
 
-	case questionsLoadedMsg:
-		m.questions = msg.questions
-		m.qCount = msg.count
-		m.qPage = msg.page
-		m.qLoading = false
-		m.qCursor = 0
-		return m, nil
-
-	case questionDetailLoadedMsg:
-		m.question = msg.question
-		m.dLoading = false
-		m.detailScroll = 0
-		var cmds []tea.Cmd
-		cmds = append(cmds, loadAnswersCmd(m.cli, msg.question.ID))
-		if msg.question.ID != "" {
-			cmds = append(cmds, loadCommentsCmd(m.cli, msg.question.ID))
-		}
-		return m, tea.Batch(cmds...)
-
-	case answersLoadedMsg:
-		m.answers = msg.answers
-		var cmds []tea.Cmd
-		for _, a := range msg.answers {
-			if a.CommentCount > 0 {
-				cmds = append(cmds, loadCommentsCmd(m.cli, a.ID))
-			}
-		}
-		return m, tea.Batch(cmds...)
-
-	case commentsLoadedMsg:
-		m.comments[msg.objectID] = msg.comments
-		return m, nil
-
-	case searchResultsMsg:
-		m.questions = nil
-		m.searchQuery = msg.query
-		m.searchActive = true
-		m.searchMode = false
-		m.qLoading = false
-		m.qCursor = 0
-		if len(msg.results) > 0 {
-			for _, r := range msg.results {
-				if r.Object != nil {
-					o := r.Object
-					m.questions = append(m.questions, models.QuestionListItem{
-						ID:          o.QuestionID,
-						Title:       o.Title,
-						VoteCount:   o.VoteCount,
-						AnswerCount: o.AnswerCount,
-						CreatedAt:   o.CreatedAt,
-					})
-				}
-			}
-		}
-		m.qCount = msg.count
-		return m, nil
-
 	case voteResultMsg:
 		if msg.err != nil {
 			m.err = msg.err
 		}
 		return m, nil
-
-	case answerAddedMsg:
-		if msg.err != nil {
-			m.err = msg.err
-		} else {
-			m.editorActive = false
-			if m.question != nil {
-				return m, loadAnswersCmd(m.cli, m.question.ID)
-			}
-		}
-		return m, nil
-
-	case commentAddedMsg:
-		if msg.err != nil {
-			m.err = msg.err
-		} else {
-			m.editorActive = false
-			if m.editorTarget != "" {
-				return m, loadCommentsCmd(m.cli, m.editorTarget)
-			}
-		}
-		return m, nil
 	}
 
-	switch m.activeView {
-	case viewQuestionList:
-		return m.updateQuestionList(msg)
-	case viewQuestionDetail:
+	// View-specific handlers
+	if m.activeView == viewQuestionDetail {
 		return m.updateQuestionDetail(msg)
 	}
-	return m, nil
+
+	// List view handles remaining messages
+	return m.updateQuestionList(msg)
 }
 
 func (m appModel) View() string {
@@ -259,7 +188,7 @@ func (m appModel) renderStatusBar() string {
 			right = "↑↓:移动 Enter:查看 /:搜索 Tab:排序 n/p:翻页 q:退出"
 		}
 	case viewQuestionDetail:
-		right = "↑↓:滚动 Esc:返回 v:投票 r:回答 c:评论 q:退出"
+		right = "↑↓:滚动 Esc:返回 v:投票 r:回答 c:评论 g:顶部 G:底部 q:退出"
 	}
 
 	barW := m.width

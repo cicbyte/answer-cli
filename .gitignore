@@ -19,5 +19,5 @@
 .claude/
 claude.md
 nul
-参考/
 .reference/
+*.log
