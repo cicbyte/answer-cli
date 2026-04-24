@@ -1,6 +1,9 @@
 package models
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 type LoginResponse struct {
 	AccessToken string          `json:"access_token"`
@@ -16,6 +19,21 @@ type AvatarInfo struct {
 	Type     string `json:"type"`
 	Gravatar string `json:"gravatar"`
 	Custom   string `json:"custom"`
+}
+
+func (a *AvatarInfo) UnmarshalJSON(data []byte) error {
+	s := strings.TrimSpace(string(data))
+	if len(s) > 0 && s[0] == '"' {
+		var url string
+		if err := json.Unmarshal(data, &url); err != nil {
+			return err
+		}
+		a.Type = "custom"
+		a.Custom = url
+		return nil
+	}
+	type raw AvatarInfo
+	return json.Unmarshal(data, (*raw)(a))
 }
 
 func (a *AvatarInfo) GetURL() string {

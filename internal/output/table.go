@@ -61,7 +61,7 @@ func PrintItems(items []Item, footer string) {
 		return
 	}
 
-	w, _, _ := getTermSize()
+	w, _, _ := GetTermSize()
 	contentW := w - 4
 
 	sep := "─"
@@ -143,7 +143,7 @@ func ReadPipeOrFile(filePath string) (string, error) {
 }
 
 func RenderMarkdown(content string) string {
-	w, _, _ := getTermSize()
+	w, _, _ := GetTermSize()
 	return RenderMarkdownWidth(content, w)
 }
 
@@ -172,7 +172,7 @@ func Dim(s string) string {
 	return "\x1b[2m" + s + "\x1b[0m"
 }
 
-func getTermSize() (int, int, error) {
+func GetTermSize() (int, int, error) {
 	w, h, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		return 80, 24, nil

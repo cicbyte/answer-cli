@@ -7,7 +7,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cicbyte/answer-cli/internal/client"
 	"github.com/cicbyte/answer-cli/internal/models"
@@ -18,7 +17,7 @@ func RunTUI() error {
 	if err != nil {
 		return err
 	}
-	p := tea.NewProgram(NewAppModel(cli), tea.WithAltScreen())
+	p := tea.NewProgram(NewAppModel(cli), tea.WithAltScreen(), tea.WithMouseAllMotion())
 	_, err = p.Run()
 	return err
 }
@@ -33,7 +32,7 @@ type appModel struct {
 	questions    []models.QuestionListItem
 	qCount       int64
 	qPage        int
-	qPageSize    int
+	qPageSize     int
 	qCursor      int
 	qLoading     bool
 	qOrder       string
@@ -43,11 +42,11 @@ type appModel struct {
 	searchActive bool
 
 	// Detail state
-	question *models.QuestionInfoResp
-	answers  []models.AnswerInfo
-	comments map[string][]models.CommentInfo
-	viewport viewport.Model
-	dLoading bool
+	question     *models.QuestionInfoResp
+	answers      []models.AnswerInfo
+	comments     map[string][]models.CommentInfo
+	dLoading     bool
+	detailScroll  int
 
 	// Editor state
 	editorActive bool
@@ -70,11 +69,11 @@ func NewAppModel(cli *client.Client) appModel {
 	si.Width = 40
 
 	return appModel{
-		cli:          cli,
+		cli:         cli,
 		qPageSize:    20,
-		qOrder:       "newest",
-		comments:     make(map[string][]models.CommentInfo),
-		searchInput:  si,
+		qOrder:      "newest",
+		comments:    make(map[string][]models.CommentInfo),
+		searchInput: si,
 	}
 }
 
@@ -87,13 +86,14 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		m.viewport.Width = msg.Width
-		m.viewport.Height = msg.Height - 3
 		return m, nil
 
 	case tea.KeyMsg:
 		if m.editorActive {
 			return m.updateEditor(msg)
+		}
+		if msg.String() == "ctrl+c" {
+			return m, tea.Quit
 		}
 		if m.err != nil {
 			if msg.String() == "enter" || msg.String() == "esc" {
@@ -104,6 +104,8 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case apiErrorMsg:
+		m.dLoading = false
+		m.qLoading = false
 		if client.IsUnauthorizedError(msg.err) {
 			m.err = fmt.Errorf("未登录或登录已过期，请先执行: answer-cli auth login")
 			return m, nil
@@ -126,8 +128,7 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case questionDetailLoadedMsg:
 		m.question = msg.question
 		m.dLoading = false
-		m.viewport.SetContent(m.renderDetailContent())
-		m.viewport.GotoTop()
+		m.detailScroll = 0
 		var cmds []tea.Cmd
 		cmds = append(cmds, loadAnswersCmd(m.cli, msg.question.ID))
 		if msg.question.ID != "" {
@@ -143,12 +144,10 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cmds = append(cmds, loadCommentsCmd(m.cli, a.ID))
 			}
 		}
-		m.viewport.SetContent(m.renderDetailContent())
 		return m, tea.Batch(cmds...)
 
 	case commentsLoadedMsg:
 		m.comments[msg.objectID] = msg.comments
-		m.viewport.SetContent(m.renderDetailContent())
 		return m, nil
 
 	case searchResultsMsg:
@@ -275,10 +274,7 @@ func (m appModel) renderStatusBar() string {
 	if used > barW {
 		return styleStatusBar.Render(left)
 	}
-	gap := (barW - used) / 2
-	if gap < 1 {
-		gap = 1
-	}
+	gap := max((barW-used)/2, 1)
 
 	return styleStatusBar.Render(left + strings.Repeat(" ", gap) + center + strings.Repeat(" ", gap) + right)
 }

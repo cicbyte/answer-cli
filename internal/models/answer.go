@@ -14,8 +14,8 @@ type AnswerInfo struct {
 	CommentCount int            `json:"comment_count"`
 	Accepted     int            `json:"accepted"`
 	Status       int            `json:"status"`
-	CreatedAt    int64          `json:"created_at"`
-	UpdatedAt    int64          `json:"updated_at"`
+	CreatedAt    int64          `json:"create_time"`
+	UpdatedAt    int64          `json:"update_time"`
 	UserInfo     *UserBasicInfo `json:"user_info"`
 }
 

@@ -10,6 +10,17 @@ import (
 
 func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.MouseMsg:
+		switch msg.Type {
+		case tea.MouseWheelUp:
+			if m.detailScroll > 0 {
+				m.detailScroll--
+			}
+			return m, nil
+		case tea.MouseWheelDown:
+			m.detailScroll++
+			return m, nil
+		}
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
@@ -19,11 +30,14 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.question = nil
 			m.answers = nil
 			m.comments = make(map[string][]models.CommentInfo)
+			m.detailScroll = 0
 			return m, loadQuestionsCmd(m.cli, m.qPage, m.qPageSize, m.qOrder)
 		case "up", "k":
-			m.viewport.LineUp(1)
+			if m.detailScroll > 0 {
+				m.detailScroll--
+			}
 		case "down", "j":
-			m.viewport.LineDown(1)
+			m.detailScroll++
 		case "v":
 			if m.question != nil {
 				return m, voteUpCmd(m.cli, m.question.ID)
@@ -48,22 +62,30 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	}
-
-	var cmd tea.Cmd
-	m.viewport, cmd = m.viewport.Update(msg)
-	return m, cmd
+	return m, nil
 }
 
 func (m appModel) viewQuestionDetail() string {
 	if m.dLoading {
 		return styleMuted.Render("加载中...")
 	}
-	return m.viewport.View()
+	content := m.renderDetailContent()
+	if content == "" {
+		content = styleMuted.Render("无内容")
+	}
+	if m.detailScroll > 0 {
+		lines := strings.Split(content, "\n")
+		if m.detailScroll >= len(lines) {
+			m.detailScroll = len(lines) - 1
+		}
+		content = strings.Join(lines[m.detailScroll:], "\n")
+	}
+	return content
 }
 
 func (m appModel) renderDetailContent() string {
 	if m.question == nil {
-		return styleMuted.Render("无内容")
+		return ""
 	}
 
 	var b strings.Builder
@@ -122,7 +144,7 @@ func (m appModel) renderDetailContent() string {
 		aVotes := styleVote.Render(fmt.Sprintf("↑ %d", a.VoteCount))
 
 		header := fmt.Sprintf("回答 %d  %s  %s  %s", i+1, aAuthor, aDate, aVotes)
-		if a.Accepted == 1 {
+		if a.ID == m.question.AcceptedAnswerID {
 			header += acceptedMark
 		}
 		b.WriteString(header)

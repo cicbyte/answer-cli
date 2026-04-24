@@ -6,8 +6,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/cicbyte/answer-cli/internal/client"
 	"github.com/cicbyte/answer-cli/internal/models"
 	"github.com/cicbyte/answer-cli/internal/output"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/spf13/cobra"
 )
 
@@ -51,70 +54,103 @@ func runGet(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Printf("ID:          %s\n", q.ID)
-	fmt.Printf("标题:        %s\n", q.Title)
-	fmt.Printf("状态:        %s\n", statusText(q.Status))
-	fmt.Printf("浏览:        %d（独立: %d）\n", q.ViewCount, q.UniqueViewCount)
-	fmt.Printf("投票:        %d\n", q.VoteCount)
-	fmt.Printf("回答:        %d\n", q.AnswerCount)
-	fmt.Printf("评论:        %d\n", q.CommentCount)
-	fmt.Printf("收藏:        %d\n", q.CollectionCount)
-	fmt.Printf("关注:        %d\n", q.FollowCount)
-	fmt.Printf("热度:        %d\n", q.HotScore)
-	fmt.Printf("创建时间:    %s\n", models.FormatTimestamp(q.CreatedAt).Format("2006-01-02 15:04:05"))
-	fmt.Printf("更新时间:    %s\n", models.FormatTimestamp(q.UpdatedAt).Format("2006-01-02 15:04:05"))
+	printQuestionHeader(q)
+	fmt.Println()
+	fmt.Println(output.RenderMarkdown(q.Content))
+
+	if q.AnswerCount > 0 {
+		answers, err := cli.Answer.Page(context.Background(), &models.AnswerListReq{
+			QuestionID: id, Page: 1, PageSize: 20,
+		})
+		if err == nil && len(answers.List) > 0 {
+			printAnswers(answers.List, q.AcceptedAnswerID)
+		}
+	}
+}
+
+func printQuestionHeader(q *models.QuestionInfoResp) {
+	author := "匿名"
+	if q.UserInfo != nil {
+		author = q.UserInfo.DisplayName
+		if author == "" {
+			author = q.UserInfo.Username
+		}
+	}
+
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleRounded)
+	t.Style().Color.Row = text.Colors{}
+	t.Style().Color.RowAlternate = text.Colors{}
+	t.Style().Options.SeparateRows = false
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{Number: 1, WidthMax: 10},
+		{Number: 2, WidthMax: 80},
+	})
+
+	t.AppendHeader(table.Row{"属性", "详情"})
+	t.AppendRow(table.Row{"标题", text.Bold.Sprint(q.Title)})
+	t.AppendRow(table.Row{"作者", author})
+	t.AppendRow(table.Row{"状态", statusText(q.Status)})
 
 	if q.AcceptedAnswerID != "" {
-		fmt.Printf("已采纳:      %s\n", q.AcceptedAnswerID)
+		t.AppendRow(table.Row{"采纳", text.FgGreen.Sprint("✓ " + q.AcceptedAnswerID)})
 	}
 
-	if q.UserInfo != nil {
-		name := q.UserInfo.DisplayName
-		if name == "" {
-			name = q.UserInfo.Username
-		}
-		fmt.Printf("作者:        %s\n", name)
-	}
+	date := models.FormatTimestamp(q.CreatedAt).Format("2006-01-02 15:04:05")
+	t.AppendRow(table.Row{"创建", date})
+
+	stats := fmt.Sprintf("↑%d  💬%d  👁%d", q.VoteCount, q.AnswerCount, q.ViewCount)
+	t.AppendRow(table.Row{"统计", stats})
 
 	if len(q.Tags) > 0 {
 		tagNames := make([]string, len(q.Tags))
 		for i, tag := range q.Tags {
 			tagNames[i] = tag.DisplayName
 		}
-		fmt.Printf("标签:        %s\n", strings.Join(tagNames, ", "))
+		t.AppendRow(table.Row{"标签", text.FgCyan.Sprint(strings.Join(tagNames, "  "))})
 	}
 
-	fmt.Println()
-	fmt.Println("--- 内容 ---")
-	fmt.Println(q.Content)
+	t.Render()
+}
 
-	// 展示回答
-	if q.AnswerCount > 0 {
-		answers, err := cli.Answer.Page(context.Background(), &models.AnswerListReq{
-			QuestionID: id, Page: 1, PageSize: 20,
-		})
-		if err == nil && len(answers.List) > 0 {
-			fmt.Println()
-			fmt.Printf("--- 回答（%d 条）---\n", len(answers.List))
-			for i, a := range answers.List {
-				author := ""
-				if a.UserInfo != nil {
-					author = a.UserInfo.DisplayName
-					if author == "" {
-						author = a.UserInfo.Username
-					}
-				}
-				accepted := ""
-				if a.Accepted == 1 {
-					accepted = " [已采纳]"
-				}
-				fmt.Printf("\n## 回答 %d%s (ID: %s)\n", i+1, accepted, a.ID)
-				fmt.Printf("作者: %s | 投票: %d | %s\n", author, a.VoteCount,
-					models.FormatTimestamp(a.CreatedAt).Format("2006-01-02 15:04"))
-				fmt.Println()
-				fmt.Println(a.Content)
+func printAnswers(answers []models.AnswerInfo, acceptedID string) {
+	fmt.Println()
+	for i, a := range answers {
+		author := "匿名"
+		if a.UserInfo != nil {
+			author = a.UserInfo.DisplayName
+			if author == "" {
+				author = a.UserInfo.Username
 			}
 		}
+		aDate := models.FormatTimestamp(a.CreatedAt).Format("2006-01-02 15:04")
+
+		title := fmt.Sprintf("回答 %d", i+1)
+		if a.ID == acceptedID {
+			title += " " + text.FgGreen.Sprint("✓ 已采纳")
+		}
+		fmt.Println(text.Bold.Sprint(title))
+
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.SetStyle(table.StyleRounded)
+		t.Style().Color.Row = text.Colors{}
+		t.Style().Color.RowAlternate = text.Colors{}
+		t.Style().Options.SeparateRows = false
+		t.SetColumnConfigs([]table.ColumnConfig{
+			{Number: 1, WidthMax: 10},
+			{Number: 2, WidthMax: 80},
+		})
+
+		t.AppendHeader(table.Row{"属性", "详情"})
+		t.AppendRow(table.Row{"作者", author})
+		t.AppendRow(table.Row{"时间", aDate})
+		t.AppendRow(table.Row{"投票", fmt.Sprintf("↑%d", a.VoteCount)})
+		t.Render()
+		fmt.Println()
+
+		fmt.Println(output.RenderMarkdown(a.Content))
 	}
 }
 
@@ -132,3 +168,5 @@ func statusText(s int) string {
 		return fmt.Sprintf("未知(%d)", s)
 	}
 }
+
+var _ *client.Client

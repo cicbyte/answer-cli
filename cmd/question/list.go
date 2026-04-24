@@ -110,7 +110,7 @@ func runPage(cli *client.Client) {
 		}
 		displayItems[i] = output.Item{
 			Title:    q.Title,
-			Subtitle: fmt.Sprintf("%s  %s  ↑%d  💬%d", date, author, q.VoteCount, q.AnswerCount),
+			Subtitle: fmt.Sprintf("%s  %s  ↑%d  💬%d  #%s", date, author, q.VoteCount, q.AnswerCount, q.ID),
 			Tags:     tags,
 		}
 	}
