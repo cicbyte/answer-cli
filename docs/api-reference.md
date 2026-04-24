@@ -1,391 +1,409 @@
 # Apache Answer API 参考
 
-> 基于 `swag init` 从源码自动生成，详见 `参考/answer/docs/swagger.json`
+> 从 `docs/swagger.json` 自动生成，共 **190 个端点**，204 个数据模型
 
 ## 认证方式
 
-- **ApiKeyAuth**：通过 HTTP Header `Authorization` 传递 Token
-- 绝大部分写操作和用户相关操作需要认证
+- **Auth**：通过 HTTP Header `Authorization` 传递 Token，写操作和用户相关操作需要认证
+- **ApiKeyAuth**：管理员 API Key 认证
+- **Public**：无需认证的公开端点
 
 ## API 基础路径
 
 - 用户端：`/answer/api/v1/`
 - 管理端：`/answer/admin/api/`
-- 安装：`/installation/`
-
-## 端点总览
-
-共 **199 个端点**，按功能分为 27 个分组。
 
 ---
 
-### 1. Question — 问题管理（17 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/question/page` | 分页获取问题列表 |
-| GET | `/answer/api/v1/question/info` | 获取问题详情 |
-| POST | `/answer/api/v1/question` | 添加问题 |
-| PUT | `/answer/api/v1/question` | 更新问题 |
-| DELETE | `/answer/api/v1/question` | 删除问题 |
-| POST | `/answer/api/v1/question/answer` | 同时添加问题和回答 |
-| POST | `/answer/api/v1/question/recover` | 恢复已删除问题 |
-| PUT | `/answer/api/v1/question/reopen` | 重新打开问题 |
-| PUT | `/answer/api/v1/question/status` | 关闭问题 |
-| PUT | `/answer/api/v1/question/operation` | 问题操作 |
-| GET | `/answer/api/v1/question/recommend/page` | 推荐问题列表 |
-| GET | `/answer/api/v1/question/similar` | 标题模糊搜索相似问题 |
-| GET | `/answer/api/v1/question/similar/tag` | 按标签搜索相似问题 |
-| GET | `/answer/api/v1/question/link` | 获取问题链接 |
-| GET | `/answer/api/v1/question/invite` | 获取邀请信息 |
-| PUT | `/answer/api/v1/question/invite` | 邀请用户回答 |
-
-### 2. Answer — 回答管理（7 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/answer/page` | 回答列表 |
-| GET | `/answer/api/v1/answer/info` | 回答详情 |
-| POST | `/answer/api/v1/answer` | 添加回答 |
-| PUT | `/answer/api/v1/answer` | 更新回答 |
-| DELETE | `/answer/api/v1/answer` | 删除回答 |
-| POST | `/answer/api/v1/answer/acceptance` | 采纳回答 |
-| POST | `/answer/api/v1/answer/recover` | 恢复已删除回答 |
-
-### 3. Tag — 标签管理（12 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/tags` | 获取标签列表 |
-| GET | `/answer/api/v1/tags/page` | 分页获取标签 |
-| GET | `/answer/api/v1/tags/following` | 获取已关注标签 |
-| GET | `/answer/api/v1/tag` | 获取单个标签 |
-| POST | `/answer/api/v1/tag` | 添加标签 |
-| PUT | `/answer/api/v1/tag` | 更新标签 |
-| DELETE | `/answer/api/v1/tag` | 删除标签 |
-| POST | `/answer/api/v1/tag/merge` | 合并标签 |
-| POST | `/answer/api/v1/tag/recover` | 恢复已删除标签 |
-| PUT | `/answer/api/v1/tag/synonym` | 更新标签同义词 |
-| GET | `/answer/api/v1/tag/synonyms` | 获取标签同义词 |
-| GET | `/answer/api/v1/question/tags` | 获取问题标签列表 |
-
-### 4. User — 用户管理（21 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/answer/api/v1/user/register/email` | 邮箱注册 |
-| POST | `/answer/api/v1/user/login/email` | 邮箱登录 |
-| GET | `/answer/api/v1/user/logout` | 登出 |
-| GET | `/answer/api/v1/user/info` | 获取当前用户信息 |
-| PUT | `/answer/api/v1/user/info` | 更新用户信息 |
-| PUT | `/answer/api/v1/user/interface` | 更新用户界面配置 |
-| PUT | `/answer/api/v1/user/password` | 修改密码 |
-| POST | `/answer/api/v1/user/password/reset` | 找回密码 |
-| POST | `/answer/api/v1/user/password/replacement` | 重置密码 |
-| PUT | `/answer/api/v1/user/email` | 邮箱变更验证 |
-| POST | `/answer/api/v1/user/email/change/code` | 发送邮箱变更验证码 |
-| POST | `/answer/api/v1/user/email/verification` | 邮箱验证 |
-| POST | `/answer/api/v1/user/email/verification/send` | 发送邮箱验证 |
-| GET | `/answer/api/v1/user/ranking` | 用户排名 |
-| GET | `/answer/api/v1/user/staff` | 获取版主/工作人员 |
-| GET | `/answer/api/v1/user/info/search` | 按名称搜索用户 |
-| GET | `/answer/api/v1/user/action/record` | 用户操作记录 |
-| GET | `/answer/api/v1/user/notification/config` | 获取通知配置 |
-| POST | `/answer/api/v1/user/notification/config` | 更新通知配置 |
-| PUT | `/answer/api/v1/user/notification/unsubscribe` | 取消订阅通知 |
-
-### 5. Comment — 评论系统（8 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/comment/page` | 评论列表 |
-| GET | `/answer/api/v1/comment` | 获取评论详情 |
-| POST | `/answer/api/v1/comment` | 添加评论 |
-| PUT | `/answer/api/v1/comment` | 更新评论 |
-| DELETE | `/answer/api/v1/comment` | 删除评论 |
-| GET | `/answer/api/v1/activity/timeline` | 对象时间线 |
-| GET | `/answer/api/v1/activity/timeline/detail` | 时间线详情 |
-| GET | `/answer/api/v1/personal/comment/page` | 个人评论列表 |
-
-### 6. Activity — 投票与关注（5 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/answer/api/v1/vote/up` | 点赞 |
-| POST | `/answer/api/v1/vote/down` | 踩 |
-| GET | `/answer/api/v1/personal/vote/page` | 个人投票记录 |
-| POST | `/answer/api/v1/follow` | 关注/取消关注 |
-| PUT | `/answer/api/v1/follow/tags` | 更新关注标签 |
-
-### 7. Notification — 通知系统（5 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/notification/page` | 通知列表 |
-| PUT | `/answer/api/v1/notification/read/state` | 标记已读 |
-| PUT | `/answer/api/v1/notification/read/state/all` | 全部标记已读 |
-| GET | `/answer/api/v1/notification/status` | 获取红点状态 |
-| PUT | `/answer/api/v1/notification/status` | 清除红点 |
+### AI 对话 — `ai-conversation`（3 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/ai/conversation` |  | query: conversation_id | `AIConversationDetailResp` | get conversation detail |
+| GET | `/ai/conversation/page` |  | query: page, page_size | `PageModel` | get conversation list |
+| POST | `/ai/conversation/vote` |  | AIConversationVoteReq | `` | vote record |
+
+### AI 对话（管理） — `ai-conversation-admin`（3 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/ai/conversation` |  | query: conversation_id | `AIConversationAdminDetailResp` | get conversation detail for admin |
+| DELETE | `/ai/conversation` |  | AIConversationAdminDeleteReq | `` | delete conversation for admin |
+| GET | `/ai/conversation/page` |  | query: page, page_size | `PageModel` | get conversation list for admin |
 
-### 8. AI — AI 对话（6 个端点）
-
-**用户端：**
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/ai/conversation` | 获取对话详情 |
-| GET | `/answer/api/v1/ai/conversation/page` | 对话列表 |
-| POST | `/answer/api/v1/ai/conversation/vote` | 对话投票 |
-
-**管理端：**
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/admin/api/ai/conversation/page` | 管理员查看对话列表 |
-| GET | `/answer/admin/api/ai/conversation` | 管理员查看对话详情 |
-| DELETE | `/answer/admin/api/ai/conversation` | 管理员删除对话 |
-
-### 9. Search — 搜索（2 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/search` | 搜索对象 |
-| GET | `/answer/api/v1/search/desc` | 获取搜索描述 |
-
-### 10. Report — 举报（3 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/answer/api/v1/report` | 添加举报 |
-| PUT | `/answer/api/v1/report/review` | 审核举报 |
-| GET | `/answer/api/v1/report/unreviewed/post` | 未审核举报列表 |
+### site — `site`（2 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/siteinfo` |  |  | `SiteInfoResp` | get site info |
+| GET | `/siteinfo/legal` |  | query: info_type | `GetSiteLegalInfoResp` | get site legal info |
 
-### 11. Review — 内容审核（2 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/review/pending/post/page` | 待审核内容列表 |
-| PUT | `/answer/api/v1/review/pending/post` | 更新审核状态 |
+### 个人中心 — `Personal`（1 个端点）
 
-### 12. Revision — 版本修订（5 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/revisions` | 修订列表 |
-| GET | `/answer/api/v1/revisions/unreviewed` | 未审核修订列表 |
-| PUT | `/answer/api/v1/revisions/audit` | 修订审核 |
-| GET | `/answer/api/v1/revisions/edit/check` | 检查是否可编辑修订 |
-| GET | `/answer/api/v1/reviewing/type` | 获取审核类型 |
-
-### 13. Collection — 收藏（2 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/answer/api/v1/collection/switch` | 添加/取消收藏 |
-| GET | `/answer/api/v1/personal/collection/page` | 个人收藏列表 |
-
-### 14. Badge — 徽章系统（7 个端点）
-
-**用户端：**
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/badge` | 获取徽章信息 |
-| GET | `/answer/api/v1/badge/awards/page` | 徽章奖励列表 |
-| GET | `/answer/api/v1/badge/user/awards` | 用户徽章奖励 |
-| GET | `/answer/api/v1/badge/user/awards/recent` | 用户最近徽章 |
-| GET | `/answer/api/v1/badges` | 所有徽章（按组分类） |
-
-**管理端：**
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/admin/api/badges` | 徽章列表 |
-| PUT | `/answer/admin/api/badge/status` | 更新徽章状态 |
-
-### 15. Upload — 文件上传（2 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/answer/api/v1/file` | 上传文件 |
-| POST | `/answer/api/v1/post/render` | 渲染内容（预览） |
-
-### 16. Plugin — 插件系统（15 个端点）
-
-**前端插件：**
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/plugin/status` | 获取所有插件状态 |
-| GET | `/answer/api/v1/embed/config` | 获取嵌入插件配置 |
-| GET | `/answer/api/v1/render/config` | 获取渲染配置 |
-| GET | `/answer/api/v1/user/plugin/config` | 获取用户插件配置 |
-| PUT | `/answer/api/v1/user/plugin/config` | 更新用户插件配置 |
-| GET | `/answer/api/v1/user/plugin/configs` | 用户可用插件列表 |
-
-**外部登录连接器：**
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/connector/info` | 获取已启用的连接器 |
-| GET | `/answer/api/v1/connector/user/info` | 获取用户连接器信息 |
-| DELETE | `/answer/api/v1/connector/user/unbinding` | 解绑外部登录 |
-| POST | `/answer/api/v1/connector/binding/email` | 绑定外部登录发送邮箱 |
-
-**管理端：**
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/admin/api/plugins` | 插件列表 |
-| GET | `/answer/admin/api/plugin/config` | 获取插件配置 |
-| PUT | `/answer/admin/api/plugin/config` | 更新插件配置 |
-| PUT | `/answer/admin/api/plugin/status` | 更新插件状态 |
-
-### 17. Personal — 个人中心（4 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/personal/answer/page` | 个人回答列表 |
-| GET | `/personal/question/page` | 个人问题列表 |
-| GET | `/answer/api/v1/personal/rank/page` | 个人排名 |
-| GET | `/answer/api/v1/personal/qa/top` | 用户问答排行 |
-
-### 18. Meta — 表情反应（2 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/meta/reaction` | 获取表情反应 |
-| PUT | `/answer/api/v1/meta/reaction` | 添加/更新表情反应 |
-
-### 19. Permission — 权限（1 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/permission` | 检查用户权限 |
-
-### 20. Lang — 多语言（5 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/language/options` | 获取语言选项 |
-| GET | `/answer/api/v1/language/config` | 获取语言配置映射 |
-| GET | `/answer/admin/api/language/options` | 管理员获取语言选项 |
-| GET | `/installation/language/options` | 安装页语言选项 |
-| GET | `/installation/language/config` | 安装页语言配置 |
-
-### 21. Site — 站点公开信息（4 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/api/v1/siteinfo` | 站点信息 |
-| GET | `/answer/api/v1/siteinfo/legal` | 法律信息 |
-| GET | `/custom.css` | 自定义 CSS |
-| GET | `/robots.txt` | robots.txt |
-
-### 22. Installation — 系统安装（5 个端点）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/` | 检查配置文件，不存在则重定向到安装页 |
-| POST | `/installation/base-info` | 初始化基础信息 |
-| POST | `/installation/config-file/check` | 检查配置文件是否存在 |
-| POST | `/installation/db/check` | 检查数据库是否存在 |
-| POST | `/installation/init` | 初始化环境 |
-
----
-
-## 管理后台 — admin（59 个端点）
-
-### AI 配置
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET/PUT | `/answer/admin/api/ai-config` | 获取/更新 AI 配置 |
-| POST | `/answer/admin/api/ai-models` | 获取 AI 模型列表 |
-| GET | `/answer/admin/api/ai-provider` | 获取 AI 提供商配置 |
-| GET/PUT | `/answer/admin/api/mcp-config` | 获取/更新 MCP 配置 |
-
-### API Key 管理
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/admin/api/api-key/all` | 获取所有 API Key |
-| POST | `/answer/admin/api/api-key` | 添加 API Key |
-| PUT | `/answer/admin/api/api-key` | 更新 API Key |
-| DELETE | `/answer/admin/api/api-key` | 删除 API Key |
-
-### 仪表盘与内容管理
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/admin/api/dashboard` | 仪表盘信息 |
-| GET | `/answer/admin/api/question/page` | 管理问题列表 |
-| PUT | `/answer/admin/api/question/status` | 更新问题状态 |
-| GET | `/answer/admin/api/answer/page` | 管理回答列表 |
-| PUT | `/answer/admin/api/answer/status` | 更新回答状态 |
-| DELETE | `/answer/admin/api/delete/permanently` | 永久删除 |
-
-### 站点设置
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET/PUT | `/answer/admin/api/siteinfo/general` | 通用信息 |
-| GET/PUT | `/answer/admin/api/siteinfo/branding` | 品牌/Logo |
-| GET/PUT | `/answer/admin/api/siteinfo/interface` | 界面设置 |
-| GET/PUT | `/answer/admin/api/siteinfo/theme` | 主题配置 |
-| GET/PUT | `/answer/admin/api/siteinfo/login` | 登录配置 |
-| GET/PUT | `/answer/admin/api/siteinfo/security` | 安全设置 |
-| GET/PUT | `/answer/admin/api/siteinfo/seo` | SEO 配置 |
-| GET/PUT | `/answer/admin/api/siteinfo/polices` | 政策配置 |
-| GET/PUT | `/answer/admin/api/siteinfo/tag` | 标签设置 |
-| GET/PUT | `/answer/admin/api/siteinfo/question` | 问题设置 |
-| GET/PUT | `/answer/admin/api/siteinfo/users` | 用户设置 |
-| GET/PUT | `/answer/admin/api/siteinfo/users-settings` | 用户详细设置 |
-| GET/PUT | `/answer/admin/api/siteinfo/custom-css-html` | 自定义 CSS/HTML |
-| GET/PUT | `/answer/admin/api/siteinfo/advanced` | 高级设置 |
-
-### 用户管理
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/admin/api/users/page` | 用户列表 |
-| POST | `/answer/admin/api/user` | 添加用户 |
-| POST | `/answer/admin/api/users` | 批量添加用户 |
-| PUT | `/answer/admin/api/user/status` | 更新用户状态 |
-| PUT | `/answer/admin/api/user/role` | 更新用户角色 |
-| PUT | `/answer/admin/api/user/profile` | 编辑用户资料 |
-| PUT | `/answer/admin/api/user/password` | 重置用户密码 |
-| GET | `/answer/admin/api/user/activation` | 获取用户激活信息 |
-| POST | `/answer/admin/api/users/activation` | 发送用户激活邮件 |
-
-### 其他管理
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/answer/admin/api/roles` | 角色列表 |
-| GET/PUT | `/answer/admin/api/setting/privileges` | 权限配置 |
-| GET/PUT | `/answer/admin/api/setting/smtp` | SMTP 配置 |
-| GET/PUT | `/answer/admin/api/theme/options` | 主题选项 |
-| GET | `/answer/admin/api/reasons` | 举报原因管理 |
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/personal/answer/page` | 🔑 | query: username, order, page, page_size | `` | list personal answers |
+
+### 举报 — `Report`（3 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| POST | `/report` | 🔑 | AddReportReq | `` | add report |
+| PUT | `/report/review` | 🔑 | ReviewReportReq | `` | review report |
+| GET | `/report/unreviewed/post` | 🔑 | query: page | `PageModel` | get unreviewed report post page |
+
+### 举报原因 — `reason`（2 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/reasons` | 🔑 | query: object_type, action | `` | get reasons by object type and action |
+| GET | `/reasons` | 🔑 | query: object_type, action | `` | get reasons by object type and action |
+
+### 内容审核 — `Review`（2 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| PUT | `/review/pending/post` | 🔑 | UpdateReviewReq | `` | update review |
+| GET | `/review/pending/post/page` | 🔑 | query: page, object_id | `PageModel` | get unreviewed post page |
+
+### 回答管理 — `Answer`（7 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| PUT | `/answer` | 🔑 | AnswerUpdateReq | `` | Update Answer |
+| POST | `/answer` | 🔑 | AnswerAddReq | `` | Add Answer |
+| DELETE | `/answer` | 🔑 | RemoveAnswerReq | `` | delete answer |
+| POST | `/answer/acceptance` | 🔑 | AcceptAnswerReq | `` | Accept Answer |
+| GET | `/answer/info` |  | query: id | `GetAnswerInfoResp` | Get Answer Detail |
+| GET | `/answer/page` |  | query: question_id, order, page, page_size | `` | AnswerList |
+| POST | `/answer/recover` | 🔑 | RecoverAnswerReq | `` | recover answer |
+
+### 外部登录连接器 — `PluginConnector`（4 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| POST | `/connector/binding/email` |  | ExternalLoginBindingUserSendEmailReq | `ExternalLoginBindingUserSendEmailResp` | external login binding user send email |
+| GET | `/connector/info` | 🔑 |  | `` | get all enabled connectors |
+| GET | `/connector/user/info` | 🔑 |  | `` | get all connectors info about user |
+| DELETE | `/connector/user/unbinding` | 🔑 | ExternalLoginUnbindingReq | `` | unbind external user login |
+
+### 多语言 — `Lang`（3 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/language/options` | 🔑 |  | `` | Get language options |
+| GET | `/language/config` |  | header: Accept-Language | `` | get language config mapping |
+| GET | `/language/options` |  |  | `` | Get language options |
+
+### 徽章管理 — `AdminBadge`（2 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| PUT | `/badge/status` | 🔑 | UpdateBadgeStatusReq | `` | update badge status |
+| GET | `/badges` | 🔑 | query: page, page_size, status, q | `` | list all badges by page |
+
+### 徽章系统 — `api-badge`（5 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/badge` |  | query: id | `GetBadgeInfoResp` | get badge info |
+| GET | `/badge/awards/page` |  | query: page, page_size, badge_id, username | `GetBadgeInfoResp` | get badge award list |
+| GET | `/badge/user/awards` |  | query: username | `` | get user badge award list |
+| GET | `/badge/user/awards/recent` |  | query: username | `` | get user badge award list |
+| GET | `/badges` |  |  | `` | list all badges group by group |
+
+### 投票与关注 — `Activity`（5 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| POST | `/follow` | 🔑 | FollowReq | `FollowResp` | follow object or cancel follow operation |
+| PUT | `/follow/tags` | 🔑 | UpdateFollowTagsReq | `` | update user follow tags |
+| GET | `/personal/vote/page` | 🔑 | query: page, page_size | `PageModel` | get user personal votes |
+| POST | `/vote/down` | 🔑 | VoteReq | `VoteResp` | vote down |
+| POST | `/vote/up` | 🔑 | VoteReq | `VoteResp` | vote up |
+
+### 排名 — `Rank`（1 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/personal/rank/page` |  | query: page, page_size, username | `PageModel` | user personal rank list |
+
+### 插件渲染 — `PluginRender`（1 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/render/config` |  |  | `RenderConfig` | GetRenderConfig |
+
+### 插件管理 — `AdminPlugin`（4 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/plugin/config` | 🔑 | query: plugin_slug_name | `GetPluginConfigResp` | get plugin config |
+| PUT | `/plugin/config` | 🔑 | UpdatePluginConfigReq | `` | update plugin config |
+| PUT | `/plugin/status` | 🔑 | UpdatePluginStatusReq | `` | update plugin status |
+| GET | `/plugins` | 🔑 | query: status, have_config | `` | get plugin list |
+
+### 插件系统 — `Plugin`（2 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/embed/config` |  |  | `` | get embed plugin config |
+| GET | `/plugin/status` |  |  | `` | get all plugins status |
+
+### 搜索 — `Search`（2 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/search` | 🔑 | query: q, order | `SearchResp` | search object |
+| GET | `/search/desc` |  |  | `SearchResp` | get search description |
+
+### 收藏 — `Collection`（2 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| POST | `/collection/switch` | 🔑 | CollectionSwitchReq | `CollectionSwitchResp` | add collection |
+| GET | `/personal/collection/page` | 🔑 | query: page, page_size | `` | list personal collections |
+
+### 文件上传 — `Upload`（2 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| POST | `/file` | 🔑 | formData: source, file | `` | upload file |
+| POST | `/post/render` | 🔑 | PostRenderReq | `` | render post content |
+
+### 权限 — `Permission`（1 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/permission` | 🔑 | header: Authorization, action | `` | check user permission |
+
+### 标签管理 — `Tag`（12 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/question/tags` | 🔑 | query: tag | `` | get tag list |
+| GET | `/tag` |  | query: tag_id, tag_name | `GetTagResp` | get tag one |
+| PUT | `/tag` | 🔑 | UpdateTagReq | `` | update tag |
+| POST | `/tag` | 🔑 | AddTagReq | `` | add tag |
+| DELETE | `/tag` | 🔑 | RemoveTagReq | `` | delete tag |
+| POST | `/tag/merge` | 🔑 | AddTagReq | `` | merge tag |
+| POST | `/tag/recover` | 🔑 | RecoverTagReq | `` | recover delete tag |
+| PUT | `/tag/synonym` | 🔑 | UpdateTagSynonymReq | `` | update tag |
+| GET | `/tag/synonyms` |  | query: tag_id | `GetTagSynonymsResp` | get tag synonyms |
+| GET | `/tags` |  | query: tags | `` | get tags list |
+| GET | `/tags/following` | 🔑 |  | `` | get following tag list |
+| GET | `/tags/page` |  | query: page, page_size, slug_name, query_cond | `PageModel` | get tag page |
+
+### 版本修订 — `Revision`（5 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/reviewing/type` | 🔑 |  | `` | get reviewing type |
+| GET | `/revisions` |  | query: object_id | `` | get revision list |
+| PUT | `/revisions/audit` | 🔑 | RevisionAuditReq | `` | revision audit |
+| GET | `/revisions/edit/check` | 🔑 | query: id | `` | check can update revision |
+| GET | `/revisions/unreviewed` | 🔑 | query: page | `PageModel` | get unreviewed revision list |
+
+### 用户插件 — `UserPlugin`（3 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/user/plugin/config` | 🔑 | query: plugin_slug_name | `GetPluginConfigResp` | get user plugin config |
+| PUT | `/user/plugin/config` | 🔑 | UpdateUserPluginConfigReq | `` | update user plugin config |
+| GET | `/user/plugin/configs` | 🔑 |  | `` | get plugin list that used for user. |
+
+### 用户管理 — `User`（21 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/personal/user/info` | 🔑 | query: username | `GetOtherUserInfoResp` | GetOtherUserInfoByUsername |
+| GET | `/user/action/record` | 🔑 | query: action | `ActionRecordResp` | ActionRecord |
+| PUT | `/user/email` | 🔑 | UserChangeEmailVerifyReq | `` | user change email verification |
+| POST | `/user/email/change/code` | 🔑 | UserChangeEmailSendCodeReq | `` | send email to the user email then change their email |
+| POST | `/user/email/verification` |  | query: code | `UserLoginResp` | UserVerifyEmail |
+| POST | `/user/email/verification/send` | 🔑 | query: captcha_id, captcha_code | `` | UserVerifyEmailSend |
+| GET | `/user/info` | 🔑 |  | `GetCurrentLoginUserInfoResp` | GetUserInfoByUserID |
+| PUT | `/user/info` | 🔑 | header: Authorization, data | `` | UserUpdateInfo update user info |
+| GET | `/user/info/search` | 🔑 | query: username | `GetOtherUserInfoResp` | SearchUserListByName |
+| PUT | `/user/interface` | 🔑 | header: Authorization, data | `` | UserUpdateInterface update user interface config |
+| POST | `/user/login/email` |  | UserEmailLoginReq | `UserLoginResp` | UserEmailLogin |
+| GET | `/user/logout` | 🔑 |  | `` | user logout |
+| PUT | `/user/notification/config` | 🔑 | UpdateUserNotificationConfigReq | `` | update user's notification config |
+| POST | `/user/notification/config` | 🔑 |  | `GetUserNotificationConfigResp` | get user's notification config |
+| PUT | `/user/notification/unsubscribe` |  | UserUnsubscribeNotificationReq | `` | unsubscribe notification |
+| PUT | `/user/password` | 🔑 | UserModifyPasswordReq | `` | UserModifyPassWord |
+| POST | `/user/password/replacement` |  | UserRePassWordRequest | `` | UseRePassWord |
+| POST | `/user/password/reset` |  | UserRetrievePassWordRequest | `` | RetrievePassWord |
+| GET | `/user/ranking` |  |  | `UserRankingResp` | get user ranking |
+| POST | `/user/register/email` |  | UserRegisterReq | `UserLoginResp` | UserRegisterByEmail |
+| GET | `/user/staff` |  | query: username, page_size | `GetUserStaffResp` | get user staff |
+
+### 管理后台 — `admin`（59 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/ai-config` | 🔑 |  | `SiteAIResp` | get AI configuration |
+| PUT | `/ai-config` | 🔑 | SiteAIReq | `` | update AI configuration |
+| POST | `/ai-models` | 🔑 |  | `` | get AI models |
+| GET | `/ai-provider` | 🔑 |  | `` | get AI provider configuration |
+| GET | `/answer/page` | 🔑 | query: page, page_size, status, query, question_id | `` | AdminAnswerPage admin answer page |
+| PUT | `/answer/status` | 🔑 | AdminUpdateAnswerStatusReq | `` | update answer status |
+| PUT | `/api-key` | 🔑 | UpdateAPIKeyReq | `` | update apikey |
+| POST | `/api-key` | 🔑 | AddAPIKeyReq | `AddAPIKeyResp` | add apikey |
+| DELETE | `/api-key` | 🔑 | DeleteAPIKeyReq | `` | delete apikey |
+| GET | `/api-key/all` | 🔑 |  | `` | get all api keys |
+| GET | `/dashboard` | 🔑 |  | `` | DashboardInfo |
+| DELETE | `/delete/permanently` | 🔑 | DeletePermanentlyReq | `` | delete permanently |
+| GET | `/mcp-config` | 🔑 |  | `SiteMCPResp` | get MCP configuration |
+| PUT | `/mcp-config` | 🔑 | SiteMCPReq | `` | update MCP configuration |
+| GET | `/question/page` | 🔑 | query: page, page_size, status, query | `` | AdminQuestionPage admin question page |
+| PUT | `/question/status` | 🔑 | AdminUpdateQuestionStatusReq | `` | update question status |
+| GET | `/roles` | 🔑 |  | `` | get role list |
+| GET | `/setting/privileges` | 🔑 |  | `GetPrivilegesConfigResp` | GetPrivilegesConfig get privileges config |
+| PUT | `/setting/privileges` | 🔑 | UpdatePrivilegesConfigReq | `` | update privileges config |
+| GET | `/setting/smtp` | 🔑 |  | `GetSMTPConfigResp` | GetSMTPConfig get smtp config |
+| PUT | `/setting/smtp` | 🔑 | UpdateSMTPConfigReq | `` | update smtp config |
+| GET | `/siteinfo/advanced` | 🔑 |  | `SiteAdvancedResp` | get site advanced setting |
+| PUT | `/siteinfo/advanced` | 🔑 | SiteAdvancedReq | `` | update site advanced info |
+| GET | `/siteinfo/branding` | 🔑 |  | `SiteBrandingResp` | get site interface |
+| PUT | `/siteinfo/branding` | 🔑 | SiteBrandingReq | `` | update site info branding |
+| GET | `/siteinfo/custom-css-html` | 🔑 |  | `SiteCustomCssHTMLResp` | get site info custom html css config |
+| PUT | `/siteinfo/custom-css-html` | 🔑 | SiteCustomCssHTMLReq | `` | update site custom css html config |
+| GET | `/siteinfo/general` | 🔑 |  | `SiteGeneralResp` | get site general information |
+| PUT | `/siteinfo/general` | 🔑 | SiteGeneralReq | `` | update site general information |
+| GET | `/siteinfo/interface` | 🔑 |  | `SiteInterfaceSettingsResp` | get site interface |
+| PUT | `/siteinfo/interface` | 🔑 | SiteInterfaceReq | `` | update site info interface |
+| GET | `/siteinfo/login` | 🔑 |  | `SiteLoginResp` | get site info login config |
+| PUT | `/siteinfo/login` | 🔑 | SiteLoginReq | `` | update site login |
+| GET | `/siteinfo/polices` | 🔑 |  | `SitePoliciesResp` | Get the policies information for the site |
+| PUT | `/siteinfo/polices` | 🔑 | SitePoliciesReq | `` | update site policies configuration |
+| GET | `/siteinfo/question` | 🔑 |  | `SiteQuestionsResp` | get site questions setting |
+| PUT | `/siteinfo/question` | 🔑 | SiteQuestionsReq | `` | update site question settings |
+| GET | `/siteinfo/security` | 🔑 |  | `SiteSecurityResp` | Get the security information for the site |
+| PUT | `/siteinfo/security` | 🔑 | SiteSecurityReq | `` | update site security configuration |
+| GET | `/siteinfo/seo` | 🔑 |  | `SiteSeoResp` | get site seo information |
+| PUT | `/siteinfo/seo` | 🔑 | SiteSeoReq | `` | update site seo information |
+| GET | `/siteinfo/tag` | 🔑 |  | `SiteTagsResp` | get site tags setting |
+| PUT | `/siteinfo/tag` | 🔑 | SiteTagsReq | `` | update site tag settings |
+| GET | `/siteinfo/theme` | 🔑 |  | `SiteThemeResp` | get site info theme config |
+| PUT | `/siteinfo/theme` | 🔑 | SiteThemeReq | `` | update site custom css html config |
+| GET | `/siteinfo/users` | 🔑 |  | `SiteUsersResp` | get site user config |
+| PUT | `/siteinfo/users` | 🔑 | SiteUsersReq | `` | update site info config about users |
+| GET | `/siteinfo/users-settings` | 🔑 |  | `SiteUsersSettingsResp` | get site interface |
+| PUT | `/siteinfo/users-settings` | 🔑 | SiteUsersSettingsReq | `` | update site info users settings |
+| GET | `/theme/options` | 🔑 |  | `` | Get theme options |
+| POST | `/user` | 🔑 | AddUserReq | `` | add user |
+| GET | `/user/activation` | 🔑 | query: user_id | `GetUserActivationResp` | get user activation |
+| PUT | `/user/password` | 🔑 | UpdateUserPasswordReq | `` | update user password |
+| PUT | `/user/profile` | 🔑 | EditUserProfileReq | `` | edit user profile |
+| PUT | `/user/role` | 🔑 | UpdateUserRoleReq | `` | update user role |
+| PUT | `/user/status` | 🔑 | UpdateUserStatusReq | `` | update user |
+| POST | `/users` | 🔑 | AddUsersReq | `` | add users |
+| POST | `/users/activation` | 🔑 | SendUserActivationReq | `` | send user activation |
+| GET | `/users/page` | 🔑 | query: page, page_size, query, staff, status | `PageModel` | get user page |
+
+### 系统安装 — `installation`（1 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/` |  |  | `` | if config file not exist try to redirect to install page |
+
+### 表情反应 — `Meta`（2 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/meta/reaction` |  | query: object_id | `ReactionRespItem` | get reaction |
+| PUT | `/meta/reaction` | 🔑 | UpdateReactionReq | `` | add or update reaction |
+
+### 评论系统 — `Comment`（8 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/activity/timeline` |  | query: object_id, tag_slug_name, object_type, show_vote | `GetObjectTimelineResp` | get object timeline |
+| GET | `/activity/timeline/detail` |  | query: revision_id | `GetObjectTimelineResp` | get object timeline detail |
+| GET | `/comment` |  | query: id | `PageModel` | get comment by id |
+| PUT | `/comment` | 🔑 | UpdateCommentReq | `` | update comment |
+| POST | `/comment` | 🔑 | AddCommentReq | `GetCommentResp` | add comment |
+| DELETE | `/comment` | 🔑 | RemoveCommentReq | `` | remove comment |
+| GET | `/comment/page` |  | query: page, page_size, object_id, query_cond | `PageModel` | get comment page |
+| GET | `/personal/comment/page` |  | query: page, page_size, username | `PageModel` | user personal comment list |
+
+### 通知系统 — `Notification`（5 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/notification/page` | 🔑 | query: page, page_size, type, inbox_type | `` | get notification list |
+| PUT | `/notification/read/state` | 🔑 | NotificationClearIDRequest | `` | ClearUnRead |
+| PUT | `/notification/read/state/all` | 🔑 | NotificationClearRequest | `` | ClearUnRead |
+| GET | `/notification/status` | 🔑 |  | `` | GetRedDot |
+| PUT | `/notification/status` | 🔑 | NotificationClearRequest | `` | DelRedDot |
+
+### 问题管理 — `Question`（17 个端点）
+
+| 方法 | 路径 | 认证 | 参数 | 响应 | 说明 |
+|------|------|------|------|------|------|
+| GET | `/personal/qa/top` |  | query: username | `` | UserTop |
+| PUT | `/question` | 🔑 | QuestionUpdate | `` | update question |
+| POST | `/question` | 🔑 | QuestionAdd | `` | add question |
+| DELETE | `/question` | 🔑 | RemoveQuestionReq | `` | delete question |
+| POST | `/question/answer` | 🔑 | QuestionAddByAnswer | `` | add question and answer |
+| GET | `/question/info` |  | query: id | `` | get question details |
+| GET | `/question/invite` |  | query: id | `` | get question invite user info |
+| PUT | `/question/invite` | 🔑 | QuestionUpdateInviteUser | `` | update question invite user |
+| GET | `/question/link` |  | query: in_days, order, page, page_size, question_id | `PageModel` | get question link |
+| PUT | `/question/operation` | 🔑 | OperationQuestionReq | `` | Operation question |
+| GET | `/question/page` |  | QuestionPageReq | `PageModel` | get questions by page |
+| GET | `/question/recommend/page` |  | QuestionPageReq | `PageModel` | get recommend questions by page |
+| POST | `/question/recover` | 🔑 | QuestionRecoverReq | `` | recover deleted question |
+| PUT | `/question/reopen` | 🔑 | ReopenQuestionReq | `` | reopen question |
+| GET | `/question/similar` | 🔑 | query: title | `` | fuzzy query similar questions based on title |
+| GET | `/question/similar/tag` |  | query: question_id | `` | Search Similar Question |
+| PUT | `/question/status` | 🔑 | CloseQuestionReq | `` | Close question |
 
 ---
 
 ## 核心数据模型
 
-| 实体 | 关键 Schema | 说明 |
-|------|-------------|------|
-| Question | `QuestionInfoResp` (32 字段), `QuestionAdd`, `QuestionUpdate` | 问题（核心实体） |
-| Answer | `AnswerInfo` (15 字段), `AnswerAddReq`, `AnswerUpdateReq` | 回答 |
-| User | `GetCurrentLoginUserInfoResp` (27 字段), `UserBasicInfo` (10 字段) | 用户 |
-| Tag | `GetTagResp` (17 字段), `TagItem`, `TagSynonym` | 标签及同义词 |
-| Comment | `GetCommentResp` (18 字段), `AddCommentReq` | 评论 |
-| Vote | `VoteReq`, `VoteResp` | 投票 |
-| Collection | `CollectionSwitchReq` | 收藏 |
-| Notification | `NotificationChannelConfig` | 通知 |
-| Badge | `GetBadgeInfoResp` (8 字段), `BadgeListInfo` | 徽章 |
-| Report | `GetReportListPageResp` (21 字段) | 举报 |
-| Revision | `GetRevisionResp` (10 字段) | 版本修订 |
-| Search | `SearchObject` (12 字段), `SearchResp` | 搜索 |
-| AI | `AIConversationRecord`, `SiteAIReq`, `SiteMCPReq` | AI 对话与配置 |
-| Site | `SiteInfoResp` (18 字段) 及各种 `Site*Req/Resp` | 站点配置 |
-| Plugin | `GetPluginListResp` (7 字段), `ConfigField` | 插件系统 |
+详细模型定义见 `docs/api/*.models.md`，以下按包分组列出被 API 引用的模型。
+
+### 响应包装（1 个）
+
+`RespBody`
+
+### 分页（1 个）
+
+`PageModel`
+
+### 插件（2 个）
+
+`EmbedConfig`, `RenderConfig`
+
+### 核心业务模型（155 个）
+
+`AIConversationAdminDeleteReq`, `AIConversationAdminDetailResp`, `AIConversationAdminListItem`, `AIConversationDetailResp`, `AIConversationListItem`, `AIConversationVoteReq`
+`AcceptAnswerReq`, `ActionRecordResp`, `AddAPIKeyReq`, `AddAPIKeyResp`, `AddCommentReq`, `AddReportReq`
+`AddTagReq`, `AddUserReq`, `AddUsersReq`, `AdminUpdateAnswerStatusReq`, `AdminUpdateQuestionStatusReq`, `AnswerAddReq`
+`AnswerUpdateReq`, `CloseQuestionReq`, `CollectionSwitchReq`, `CollectionSwitchResp`, `ConnectorInfoResp`, `ConnectorUserInfoResp`
+`DeleteAPIKeyReq`, `DeletePermanentlyReq`, `EditUserProfileReq`, `ExternalLoginBindingUserSendEmailReq`, `ExternalLoginBindingUserSendEmailResp`, `ExternalLoginUnbindingReq`
+`FollowReq`, `FollowResp`, `GetAIModelResp`, `GetAIProviderResp`, `GetAPIKeyResp`, `GetAnswerInfoResp`
+`GetBadgeInfoResp`, `GetBadgeListPagedResp`, `GetBadgeListResp`, `GetCommentPersonalWithPageResp`, `GetCommentResp`, `GetCurrentLoginUserInfoResp`
+`GetFollowingTagsResp`, `GetObjectTimelineResp`, `GetOtherUserInfoResp`, `GetPluginConfigResp`, `GetPluginListResp`, `GetPrivilegesConfigResp`
+`GetRankPersonalPageResp`, `GetReportListPageResp`, `GetReviewingTypeResp`, `GetRevisionResp`, `GetRoleResp`, `GetSMTPConfigResp`
+`GetSiteLegalInfoResp`, `GetTagBasicResp`, `GetTagPageResp`, `GetTagResp`, `GetTagSynonymsResp`, `GetUnreviewedPostPageResp`
+`GetUnreviewedRevisionResp`, `GetUserActivationResp`, `GetUserBadgeAwardListResp`, `GetUserNotificationConfigResp`, `GetUserPageResp`, `GetUserPluginListResp`
+`GetUserStaffResp`, `GetVoteWithPageResp`, `NotificationClearIDRequest`, `NotificationClearRequest`, `OperationQuestionReq`, `PostRenderReq`
+`QuestionAdd`, `QuestionAddByAnswer`, `QuestionPageReq`, `QuestionPageResp`, `QuestionRecoverReq`, `QuestionUpdate`
+`QuestionUpdateInviteUser`, `ReactionRespItem`, `RecoverAnswerReq`, `RecoverTagReq`, `RemoveAnswerReq`, `RemoveCommentReq`
+`RemoveQuestionReq`, `RemoveTagReq`, `ReopenQuestionReq`, `ReviewReportReq`, `RevisionAuditReq`, `SearchResp`
+`SendUserActivationReq`, `SiteAIReq`, `SiteAIResp`, `SiteAdvancedReq`, `SiteAdvancedResp`, `SiteBrandingReq`
+`SiteBrandingResp`, `SiteCustomCssHTMLReq`, `SiteCustomCssHTMLResp`, `SiteGeneralReq`, `SiteGeneralResp`, `SiteInfoResp`
+`SiteInterfaceReq`, `SiteInterfaceSettingsResp`, `SiteLoginReq`, `SiteLoginResp`, `SiteMCPReq`, `SiteMCPResp`
+`SitePoliciesReq`, `SitePoliciesResp`, `SiteQuestionsReq`, `SiteQuestionsResp`, `SiteSecurityReq`, `SiteSecurityResp`
+`SiteSeoReq`, `SiteSeoResp`, `SiteTagsReq`, `SiteTagsResp`, `SiteThemeReq`, `SiteThemeResp`
+`SiteUsersReq`, `SiteUsersResp`, `SiteUsersSettingsReq`, `SiteUsersSettingsResp`, `UpdateAPIKeyReq`, `UpdateBadgeStatusReq`
+`UpdateCommentReq`, `UpdateFollowTagsReq`, `UpdateInfoRequest`, `UpdatePluginConfigReq`, `UpdatePluginStatusReq`, `UpdatePrivilegesConfigReq`
+`UpdateReactionReq`, `UpdateReviewReq`, `UpdateSMTPConfigReq`, `UpdateTagReq`, `UpdateTagSynonymReq`, `UpdateUserInterfaceRequest`
+`UpdateUserNotificationConfigReq`, `UpdateUserPasswordReq`, `UpdateUserPluginConfigReq`, `UpdateUserRoleReq`, `UpdateUserStatusReq`, `UserChangeEmailSendCodeReq`
+`UserChangeEmailVerifyReq`, `UserEmailLoginReq`, `UserLoginResp`, `UserModifyPasswordReq`, `UserRankingResp`, `UserRePassWordRequest`
+`UserRegisterReq`, `UserRetrievePassWordRequest`, `UserUnsubscribeNotificationReq`, `VoteReq`, `VoteResp`
+
