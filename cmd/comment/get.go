@@ -48,18 +48,12 @@ func runGet(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Printf("ID:        %s\n", c.ID)
+	fmt.Printf("ID:        %s\n", c.CommentID)
 	fmt.Printf("ObjectID:  %s\n", c.ObjectID)
 	if c.QuestionID != "" {
 		fmt.Printf("Question:  %s\n", c.QuestionID)
 	}
-	if c.UserInfo != nil {
-		user := c.UserInfo.DisplayName
-		if user == "" {
-			user = c.UserInfo.Username
-		}
-		fmt.Printf("User:      %s\n", user)
-	}
+	fmt.Printf("User:      %s\n", c.DisplayAuthor())
 	fmt.Printf("Votes:     %d\n", c.VoteCount)
 	fmt.Printf("Created:   %s\n", models.FormatTimestamp(c.CreatedAt).Format("2006-01-02 15:04:05"))
 	if c.UpdatedAt > 0 {

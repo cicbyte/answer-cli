@@ -68,15 +68,15 @@ func runList(cmd *cobra.Command, args []string) {
 	var rows [][]string
 	for _, c := range resp.List {
 		user := ""
-		if c.UserInfo != nil {
-			user = c.UserInfo.DisplayName
+		if c.UserDisplayName != "" || c.Username != "" {
+			user = c.UserDisplayName
 			if user == "" {
-				user = c.UserInfo.Username
+				user = c.Username
 			}
 		}
 		created := models.FormatTimestamp(c.CreatedAt).Format("2006-01-02 15:04")
 		rows = append(rows, []string{
-			c.ID,
+			c.CommentID,
 			user,
 			output.Truncate(c.OriginalText, 50),
 			created,

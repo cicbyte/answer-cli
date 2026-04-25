@@ -174,7 +174,7 @@ func (m appModel) renderStatusBar() string {
 			right = "↑↓:移动 Enter:查看 /:搜索 Tab:排序 n/p:翻页 q:退出"
 		}
 	case viewQuestionDetail:
-		right = "↑↓:滚动 Esc:返回 g:顶部 G:底部 q:退出"
+		right = "↑↓:滚动 Esc:返回 Home/End:首尾 q:退出"
 	}
 
 	barW := m.width

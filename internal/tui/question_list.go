@@ -186,7 +186,7 @@ func (m appModel) viewQuestionList() string {
 			author = q.UserInfo.DisplayName
 		}
 
-		meta := styleMuted.Render(fmt.Sprintf("%s  %s  %s", date, author, tags))
+		meta := styleMuted.Render(fmt.Sprintf("#%s  %s  %s  %s", q.ID, date, author, tags))
 		line2 := "  " + meta
 
 		lines = append(lines, line1, line2)

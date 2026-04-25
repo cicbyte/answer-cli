@@ -73,6 +73,6 @@ func runAdd(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Printf("Comment added successfully!\n")
-	fmt.Printf("  ID:      %s\n", result.ID)
+	fmt.Printf("  ID:      %s\n", result.CommentID)
 	fmt.Printf("  Object:  %s\n", result.ObjectID)
 }

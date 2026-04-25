@@ -34,10 +34,10 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "down", "j":
 			m.viewport.LineDown(1)
 			return m, nil
-		case "g":
+		case "home":
 			m.viewport.GotoTop()
 			return m, nil
-		case "G":
+		case "end":
 			m.viewport.GotoBottom()
 			return m, nil
 		}
@@ -112,13 +112,32 @@ func (m appModel) buildDetailContent() string {
 
 	b.WriteString(renderMarkdown(m.question.Content, w))
 
+	qComments := m.comments[m.question.ID]
+	if len(qComments) > 0 {
+		b.WriteString("\n\n")
+		b.WriteString(styleMuted.Render("问题评论"))
+		b.WriteString("\n")
+		for _, c := range qComments {
+			cAuthor := "匿名"
+			if c.DisplayAuthor() != "匿名" {
+				cAuthor = c.DisplayAuthor()
+				if cAuthor == "" {
+					cAuthor = c.Username
+				}
+			}
+			cDate := models.FormatTimestamp(c.CreatedAt).Format("2006-01-02 15:04")
+			b.WriteString(styleDim.Render(fmt.Sprintf("  └ #%s %s %s: %s", c.CommentID, cAuthor, cDate, c.OriginalText)))
+			b.WriteString("\n")
+		}
+	}
+
 	if len(m.answers) == 0 {
 		b.WriteString("\n\n")
 		b.WriteString(styleSeparator.Render(strings.Repeat("─", w)))
 		b.WriteString("\n")
 		b.WriteString(styleMuted.Render("暂无回答"))
 	} else {
-		for i, a := range m.answers {
+		for _, a := range m.answers {
 			isAccepted := a.ID == m.question.AcceptedAnswerID
 			aAuthor := "匿名"
 			if a.UserInfo != nil {
@@ -130,7 +149,7 @@ func (m appModel) buildDetailContent() string {
 			b.WriteString(styleSeparator.Render(strings.Repeat("─", w)))
 			b.WriteString("\n")
 
-			title := fmt.Sprintf(" 回答 %d ", i+1)
+			title := fmt.Sprintf(" 回答 #%s ", a.ID)
 			if isAccepted {
 				title += styleAccepted.Render("✓ 已采纳")
 			}
@@ -154,32 +173,17 @@ func (m appModel) buildDetailContent() string {
 				b.WriteString("\n")
 				for _, c := range comments {
 					cAuthor := "匿名"
-					if c.UserInfo != nil {
-						cAuthor = c.UserInfo.DisplayName
+					if c.DisplayAuthor() != "匿名" {
+						cAuthor = c.DisplayAuthor()
+						if cAuthor == "" {
+							cAuthor = c.Username
+						}
 					}
 					cDate := models.FormatTimestamp(c.CreatedAt).Format("2006-01-02 15:04")
-					b.WriteString(styleDim.Render(fmt.Sprintf("  └ %s %s: %s", cAuthor, cDate, c.OriginalText)))
+					b.WriteString(styleDim.Render(fmt.Sprintf("  └ #%s %s %s: %s", c.CommentID, cAuthor, cDate, c.OriginalText)))
 					b.WriteString("\n")
 				}
 			}
-		}
-	}
-
-	qComments := m.comments[m.question.ID]
-	if len(qComments) > 0 {
-		b.WriteString("\n\n")
-		b.WriteString(styleSeparator.Render(strings.Repeat("─", w)))
-		b.WriteString("\n")
-		b.WriteString(styleMuted.Render("问题评论"))
-		b.WriteString("\n")
-		for _, c := range qComments {
-			cAuthor := "匿名"
-			if c.UserInfo != nil {
-				cAuthor = c.UserInfo.DisplayName
-			}
-			cDate := models.FormatTimestamp(c.CreatedAt).Format("2006-01-02 15:04")
-			b.WriteString(styleDim.Render(fmt.Sprintf("  └ %s %s: %s", cAuthor, cDate, c.OriginalText)))
-			b.WriteString("\n")
 		}
 	}
 
@@ -192,6 +196,8 @@ func (m appModel) renderDetailHeader() string {
 
 	b.WriteString(styleTitle.Render(m.question.Title))
 	b.WriteString("\n")
+	b.WriteString(styleDim.Render(fmt.Sprintf("#%s", m.question.ID)))
+	b.WriteString("\n")
 
 	author := "匿名"
 	if m.question.UserInfo != nil {
@@ -200,7 +206,7 @@ func (m appModel) renderDetailHeader() string {
 	date := models.FormatTimestamp(m.question.CreatedAt).Format("2006-01-02 15:04")
 	votes := styleVote.Render(fmt.Sprintf("↑%d", m.question.VoteCount))
 
-	meta := fmt.Sprintf("%s · %s · %s · 浏览%d · %s", author, date, votes, m.question.ViewCount, statusLabel(m.question.Status))
+	meta := fmt.Sprintf("%s · %s · %s · 浏览%d · 评论%d · %s", author, date, votes, m.question.ViewCount, m.question.CommentCount, statusLabel(m.question.Status))
 	if m.question.AcceptedAnswerID != "" {
 		meta += " · " + styleAccepted.Render("✓ 已采纳")
 	}

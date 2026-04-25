@@ -49,5 +49,5 @@ func (s *CommentService) Update(ctx context.Context, req *models.CommentUpdateRe
 }
 
 func (s *CommentService) Delete(ctx context.Context, id string) error {
-	return s.client.DeleteJSON(ctx, "/comment", &models.CommentDeleteReq{ID: id})
+	return s.client.DeleteJSON(ctx, "/comment", &models.CommentDeleteReq{CommentID: id})
 }

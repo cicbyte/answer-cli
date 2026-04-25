@@ -56,7 +56,7 @@ func runUpdate(cmd *cobra.Command, args []string) {
 	}
 
 	req := &models.CommentUpdateReq{
-		ID:           id,
+		CommentID:    id,
 		OriginalText: text,
 	}
 
