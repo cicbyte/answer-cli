@@ -10,6 +10,13 @@ import (
 )
 
 func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Ensure viewport height is correct before processing any event
+	if m.detailHeaderLines > 0 {
+		if vpH := m.height - m.detailHeaderLines - 3; vpH > 0 {
+			m.viewport.Height = vpH
+		}
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -20,6 +27,7 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.question = nil
 			m.answers = nil
 			m.comments = make(map[string][]models.CommentInfo)
+			m.detailHeaderLines = 0
 			return m, loadQuestionsCmd(m.cli, m.qPage, m.qPageSize, m.qOrder)
 		case "v":
 			if m.question != nil {
@@ -43,6 +51,18 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.editorTarget = m.question.ID
 				return m, ta.Focus()
 			}
+		case "up", "k":
+			m.viewport.LineUp(1)
+			return m, nil
+		case "down", "j":
+			m.viewport.LineDown(1)
+			return m, nil
+		case "g":
+			m.viewport.GotoTop()
+			return m, nil
+		case "G":
+			m.viewport.GotoBottom()
+			return m, nil
 		}
 	case tea.MouseMsg:
 		switch {
@@ -52,9 +72,6 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.viewport.LineDown(1)
 		}
 		return m, nil
-	case tea.WindowSizeMsg:
-		m.viewport.Width = msg.Width
-		m.viewport.Height = msg.Height
 	}
 
 	var cmds []tea.Cmd
@@ -62,6 +79,11 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if qm, ok := msg.(questionDetailLoadedMsg); ok {
 		m.question = qm.question
 		m.dLoading = false
+		// Calculate and cache header height, set viewport dimensions
+		m.detailHeaderLines = strings.Count(m.renderDetailHeader(), "\n") + 1
+		if vpH := m.height - m.detailHeaderLines - 3; vpH > 0 {
+			m.viewport.Height = vpH
+		}
 		m.detailContent = m.buildDetailContent()
 		m.viewport.SetContent(m.detailContent)
 		m.viewport.GotoTop()

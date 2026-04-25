@@ -43,12 +43,13 @@ type appModel struct {
 	searchActive bool
 
 	// Detail state
-	question      *models.QuestionInfoResp
-	answers       []models.AnswerInfo
-	comments      map[string][]models.CommentInfo
-	dLoading      bool
-	viewport      viewport.Model
-	detailContent string
+	question          *models.QuestionInfoResp
+	answers           []models.AnswerInfo
+	comments          map[string][]models.CommentInfo
+	dLoading          bool
+	viewport          viewport.Model
+	detailContent     string
+	detailHeaderLines int
 
 	// Editor state
 	editorActive bool
@@ -90,9 +91,11 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		if m.activeView == viewQuestionDetail {
-			m.viewport.Width = msg.Width
-			m.viewport.Height = msg.Height
+		m.viewport.Width = msg.Width
+		if m.detailHeaderLines > 0 {
+			m.viewport.Height = m.height - m.detailHeaderLines - 3
+		} else {
+			m.viewport.Height = m.height
 		}
 		return m, nil
 

@@ -18,6 +18,35 @@ func (m appModel) updateQuestionList(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
+	case questionsLoadedMsg:
+		m.questions = msg.questions
+		m.qCount = msg.count
+		m.qPage = msg.page
+		m.qLoading = false
+		m.qCursor = 0
+		return m, nil
+
+	case searchResultsMsg:
+		m.searchActive = true
+		m.searchQuery = msg.query
+		m.qLoading = false
+		m.qCursor = 0
+		items := make([]models.QuestionListItem, 0, len(msg.results))
+		for _, r := range msg.results {
+			if r.ObjectType == "question" && r.Object != nil {
+				items = append(items, models.QuestionListItem{
+					ID:          r.Object.ID,
+					Title:       r.Object.Title,
+					VoteCount:   r.Object.VoteCount,
+					AnswerCount: r.Object.AnswerCount,
+					CreatedAt:   r.Object.CreatedAt,
+				})
+			}
+		}
+		m.questions = items
+		m.qCount = msg.count
+		return m, nil
+
 	case tea.KeyMsg:
 		if m.searchMode {
 			switch msg.String() {
