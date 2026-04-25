@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
@@ -56,12 +55,6 @@ type appModel struct {
 	detailContent     string
 	detailHeaderLines int
 
-	// Editor state
-	editorActive bool
-	editorMode   editorMode
-	editorInput  textarea.Model
-	editorTarget string
-
 	// Auth
 	username string
 
@@ -91,14 +84,13 @@ func (m appModel) Init() tea.Cmd {
 }
 
 func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// Global handlers
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
 		m.viewport.Width = msg.Width
 		if m.detailHeaderLines > 0 {
-			m.viewport.Height = m.height - m.detailHeaderLines - 3
+			m.viewport.Height = m.height - m.detailHeaderLines - 2
 		} else {
 			m.viewport.Height = m.height
 		}
@@ -109,21 +101,16 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 		if m.err != nil {
-			m.editorActive = false
 			if msg.String() == "enter" || msg.String() == "esc" {
 				m.err = nil
 				return m, nil
 			}
 			return m, nil
 		}
-		if m.editorActive {
-			return m.updateEditor(msg)
-		}
 
 	case apiErrorMsg:
 		m.dLoading = false
 		m.qLoading = false
-		m.editorActive = false
 		if client.IsUnauthorizedError(msg.err) {
 			m.err = fmt.Errorf("未登录或登录已过期，请先执行: answer-cli auth login")
 			return m, nil
@@ -134,23 +121,12 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case authCheckedMsg:
 		m.username = msg.username
 		return m, nil
-
-	case voteResultMsg:
-		m.editorActive = false
-		if msg.err != nil {
-			m.err = msg.err
-		} else if m.activeView == viewQuestionDetail && m.question != nil {
-			return m, loadQuestionDetailCmd(m.cli, m.question.ID)
-		}
-		return m, nil
 	}
 
-	// View-specific handlers
 	if m.activeView == viewQuestionDetail {
 		return m.updateQuestionDetail(msg)
 	}
 
-	// List view handles remaining messages
 	return m.updateQuestionList(msg)
 }
 
@@ -165,9 +141,6 @@ func (m appModel) View() string {
 
 	content += "\n" + m.renderStatusBar()
 
-	if m.editorActive {
-		content = overlayEditor(content, m)
-	}
 	if m.err != nil {
 		content = overlayError(content, m.err)
 	}
@@ -201,7 +174,7 @@ func (m appModel) renderStatusBar() string {
 			right = "↑↓:移动 Enter:查看 /:搜索 Tab:排序 n/p:翻页 q:退出"
 		}
 	case viewQuestionDetail:
-		right = "↑↓:滚动 Esc:返回 v:投票 r:回答 c:评论 g:顶部 G:底部 q:退出"
+		right = "↑↓:滚动 Esc:返回 g:顶部 G:底部 q:退出"
 	}
 
 	barW := m.width

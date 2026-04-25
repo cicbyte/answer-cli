@@ -9,7 +9,6 @@ var (
 	colorWarning   = lipgloss.Color("#E5C07B")
 	colorError     = lipgloss.Color("#E06C75")
 	colorMuted     = lipgloss.Color("#5C6370")
-	colorText      = lipgloss.Color("#ABB2BF")
 
 	styleTitle = lipgloss.NewStyle().Bold(true).Foreground(colorPrimary)
 	styleCursor = lipgloss.NewStyle().Foreground(colorSecondary).Bold(true)
@@ -25,17 +24,6 @@ var (
 		Background(lipgloss.Color("#21252B")).
 		Foreground(colorMuted).
 		Padding(0, 1)
-
-	styleSearchBar = lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(colorPrimary).
-		Padding(0, 1).
-		Width(40)
-
-	styleEditor = lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(colorSecondary).
-		Padding(1, 2)
 
 	styleErrorBox = lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).

@@ -96,37 +96,6 @@ func searchCmd(cli *client.Client, query string) tea.Cmd {
 	})
 }
 
-func voteUpCmd(cli *client.Client, objectID string) tea.Cmd {
-	return safeCmd(func() tea.Msg {
-		ctx, cancel := apiCtx()
-		defer cancel()
-		err := cli.Vote.VoteUp(ctx, objectID)
-		return voteResultMsg{err: err}
-	})
-}
-
-func addAnswerCmd(cli *client.Client, questionID, content string) tea.Cmd {
-	return safeCmd(func() tea.Msg {
-		ctx, cancel := apiCtx()
-		defer cancel()
-		_, err := cli.Answer.Add(ctx, &models.AnswerAddReq{
-			QuestionID: questionID, Content: content,
-		})
-		return answerAddedMsg{err: err}
-	})
-}
-
-func addCommentCmd(cli *client.Client, objectID, text string) tea.Cmd {
-	return safeCmd(func() tea.Msg {
-		ctx, cancel := apiCtx()
-		defer cancel()
-		_, err := cli.Comment.Add(ctx, &models.CommentAddReq{
-			ObjectID: objectID, OriginalText: text,
-		})
-		return commentAddedMsg{err: err}
-	})
-}
-
 func checkAuthCmd(cli *client.Client) tea.Cmd {
 	return safeCmd(func() tea.Msg {
 		if cli.GetToken() == "" {

@@ -10,9 +10,8 @@ import (
 )
 
 func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// Ensure viewport height is correct before processing any event
 	if m.detailHeaderLines > 0 {
-		if vpH := m.height - m.detailHeaderLines - 3; vpH > 0 {
+		if vpH := m.height - m.detailHeaderLines - 2; vpH > 0 {
 			m.viewport.Height = vpH
 		}
 	}
@@ -20,7 +19,7 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "q", "ctrl+c":
+		case "q":
 			return m, tea.Quit
 		case "esc":
 			m.activeView = viewQuestionList
@@ -29,28 +28,6 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.comments = make(map[string][]models.CommentInfo)
 			m.detailHeaderLines = 0
 			return m, loadQuestionsCmd(m.cli, m.qPage, m.qPageSize, m.qOrder)
-		case "v":
-			if m.question != nil {
-				return m, voteUpCmd(m.cli, m.question.ID)
-			}
-		case "r":
-			if m.question != nil {
-				ta := newEditorTextarea("编写你的回答...")
-				m.editorActive = true
-				m.editorMode = modeAnswer
-				m.editorInput = ta
-				m.editorTarget = m.question.ID
-				return m, ta.Focus()
-			}
-		case "c":
-			if m.question != nil {
-				ta := newEditorTextarea("添加评论...")
-				m.editorActive = true
-				m.editorMode = modeComment
-				m.editorInput = ta
-				m.editorTarget = m.question.ID
-				return m, ta.Focus()
-			}
 		case "up", "k":
 			m.viewport.LineUp(1)
 			return m, nil
@@ -79,9 +56,8 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if qm, ok := msg.(questionDetailLoadedMsg); ok {
 		m.question = qm.question
 		m.dLoading = false
-		// Calculate and cache header height, set viewport dimensions
 		m.detailHeaderLines = strings.Count(m.renderDetailHeader(), "\n") + 1
-		if vpH := m.height - m.detailHeaderLines - 3; vpH > 0 {
+		if vpH := m.height - m.detailHeaderLines - 2; vpH > 0 {
 			m.viewport.Height = vpH
 		}
 		m.detailContent = m.buildDetailContent()
@@ -104,23 +80,6 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.comments[cm.objectID] = cm.comments
 		m.detailContent = m.buildDetailContent()
 		m.viewport.SetContent(m.detailContent)
-	} else if aa, ok := msg.(answerAddedMsg); ok {
-		m.editorActive = false
-		if aa.err != nil {
-			m.err = aa.err
-		} else if m.question != nil {
-			cmds = append(cmds, loadAnswersCmd(m.cli, m.question.ID))
-		}
-	} else if cc, ok := msg.(commentAddedMsg); ok {
-		m.editorActive = false
-		if cc.err != nil {
-			m.err = cc.err
-		} else if m.question != nil {
-			cmds = append(cmds, loadCommentsCmd(m.cli, m.question.ID))
-			if m.editorTarget != m.question.ID {
-				cmds = append(cmds, loadCommentsCmd(m.cli, m.editorTarget))
-			}
-		}
 	}
 
 	if len(cmds) > 0 {

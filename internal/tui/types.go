@@ -9,13 +9,6 @@ const (
 	viewQuestionDetail
 )
 
-type editorMode int
-
-const (
-	modeAnswer editorMode = iota
-	modeComment
-)
-
 type questionsLoadedMsg struct {
 	questions []models.QuestionListItem
 	count     int64
@@ -40,18 +33,6 @@ type searchResultsMsg struct {
 	results []*models.SearchResult
 	count   int64
 	query   string
-}
-
-type voteResultMsg struct {
-	err error
-}
-
-type answerAddedMsg struct {
-	err error
-}
-
-type commentAddedMsg struct {
-	err error
 }
 
 type authCheckedMsg struct {
