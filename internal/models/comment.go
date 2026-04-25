@@ -6,25 +6,25 @@ type CommentListResp struct {
 }
 
 type CommentInfo struct {
-	CommentID             string `json:"comment_id"`
-	ObjectID              string `json:"object_id"`
-	QuestionID            string `json:"question_id"`
-	ReplyUserID           string `json:"reply_user_id"`
-	ReplyUsername         string `json:"reply_username"`
-	ReplyUserDisplayName  string `json:"reply_user_display_name"`
-	ReplyCommentID        string `json:"reply_comment_id"`
-	OriginalText          string `json:"original_text"`
-	ParsedText            string `json:"parsed_text"`
-	VoteCount             int    `json:"vote_count"`
-	IsVote                bool   `json:"is_vote"`
-	Status                int    `json:"status"`
-	CreatedAt             int64  `json:"created_at"`
-	UpdatedAt             int64  `json:"updated_at"`
-	UserID                string `json:"user_id"`
-	Username              string `json:"username"`
-	UserDisplayName       string `json:"user_display_name"`
-	UserAvatar            string `json:"user_avatar"`
-	UserStatus            string `json:"user_status"`
+	CommentID            string `json:"comment_id"`
+	ObjectID             string `json:"object_id"`
+	QuestionID           string `json:"question_id"`
+	ReplyUserID          string `json:"reply_user_id"`
+	ReplyUsername        string `json:"reply_username"`
+	ReplyUserDisplayName string `json:"reply_user_display_name"`
+	ReplyCommentID       string `json:"reply_comment_id"`
+	OriginalText         string `json:"original_text"`
+	ParsedText           string `json:"parsed_text"`
+	VoteCount            int    `json:"vote_count"`
+	IsVote               bool   `json:"is_vote"`
+	Status               int    `json:"status"`
+	CreatedAt            int64  `json:"created_at"`
+	UpdatedAt            int64  `json:"updated_at"`
+	UserID               string `json:"user_id"`
+	Username             string `json:"username"`
+	UserDisplayName      string `json:"user_display_name"`
+	UserAvatar           string `json:"user_avatar"`
+	UserStatus           string `json:"user_status"`
 }
 
 // DisplayAuthor returns the best available display name.
@@ -45,7 +45,7 @@ type CommentAddReq struct {
 }
 
 type CommentUpdateReq struct {
-	CommentID   string `json:"comment_id"`
+	CommentID    string `json:"comment_id"`
 	OriginalText string `json:"original_text"`
 }
 

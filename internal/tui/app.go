@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cicbyte/answer-cli/internal/client"
 	"github.com/cicbyte/answer-cli/internal/models"
@@ -37,7 +37,7 @@ type appModel struct {
 	questions    []models.QuestionListItem
 	qCount       int64
 	qPage        int
-	qPageSize     int
+	qPageSize    int
 	qCursor      int
 	qLoading     bool
 	qOrder       string
@@ -71,7 +71,7 @@ func NewAppModel(cli *client.Client) appModel {
 
 	return appModel{
 		cli:         cli,
-		qPageSize:    20,
+		qPageSize:   20,
 		qOrder:      "newest",
 		comments:    make(map[string][]models.CommentInfo),
 		searchInput: si,

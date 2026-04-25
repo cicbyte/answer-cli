@@ -24,10 +24,10 @@ func runList(cmd *cobra.Command, args []string) {
 
 	// 构建配置项列表
 	type configEntry struct {
-		key        string
-		section    string
-		value      string
-		sensitive  bool
+		key       string
+		section   string
+		value     string
+		sensitive bool
 	}
 
 	entries := []configEntry{

@@ -103,11 +103,11 @@ func handleQuestionSearch(ctx context.Context, cli *client.Client, req mcp.CallT
 	}
 
 	type item struct {
-		ID          string `json:"id"`
-		Title       string `json:"title"`
-		AnswerCount int    `json:"answer_count"`
-		VoteCount   int    `json:"vote_count"`
-		CreatedAt   string `json:"created_at"`
+		ID          string   `json:"id"`
+		Title       string   `json:"title"`
+		AnswerCount int      `json:"answer_count"`
+		VoteCount   int      `json:"vote_count"`
+		CreatedAt   string   `json:"created_at"`
 		Tags        []string `json:"tags,omitempty"`
 	}
 
@@ -121,7 +121,7 @@ func handleQuestionSearch(ctx context.Context, cli *client.Client, req mcp.CallT
 			ID: q.ID, Title: q.Title, AnswerCount: q.AnswerCount,
 			VoteCount: q.VoteCount,
 			CreatedAt: models.FormatTimestamp(q.CreatedAt).Format("2006-01-02"),
-			Tags: tags,
+			Tags:      tags,
 		})
 	}
 
@@ -219,9 +219,9 @@ func handleAnswerList(ctx context.Context, cli *client.Client, req mcp.CallToolR
 		}
 		items = append(items, item{
 			ID: a.ID, Content: a.Content, VoteCount: a.VoteCount,
-			Accepted: a.Accepted,
+			Accepted:  a.Accepted,
 			CreatedAt: models.FormatTimestamp(a.CreatedAt).Format("2006-01-02"),
-			Username: username,
+			Username:  username,
 		})
 	}
 	if items == nil {

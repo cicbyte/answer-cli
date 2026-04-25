@@ -16,8 +16,8 @@ import (
 	"github.com/cicbyte/answer-cli/cmd/tag"
 	"github.com/cicbyte/answer-cli/internal/common"
 	"github.com/cicbyte/answer-cli/internal/log"
-	"github.com/cicbyte/answer-cli/internal/tui"
 	"github.com/cicbyte/answer-cli/internal/output"
+	"github.com/cicbyte/answer-cli/internal/tui"
 	"github.com/cicbyte/answer-cli/internal/utils"
 	"github.com/spf13/cobra"
 )

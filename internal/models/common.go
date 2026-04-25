@@ -1,8 +1,8 @@
 package models
 
 type PageModel struct {
-	Count int64       `json:"count"`
-	List  any `json:"list"`
+	Count int64 `json:"count"`
+	List  any   `json:"list"`
 }
 
 type TagItem struct {

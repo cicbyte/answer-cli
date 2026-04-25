@@ -1,19 +1,19 @@
 package models
 
 type NotificationListResp struct {
-	Count int64               `json:"count"`
-	List  []NotificationItem  `json:"list"`
+	Count int64              `json:"count"`
+	List  []NotificationItem `json:"list"`
 }
 
 type NotificationItem struct {
-	ID          string `json:"id"`
-	Type        string `json:"type"`
-	IsRead      bool   `json:"is_read"`
-	Title       string `json:"title"`
-	Content     string `json:"content"`
-	ObjectID    string `json:"object_id"`
-	Reason      string `json:"reason"`
-	CreatedAt   int64  `json:"created_at"`
+	ID        string `json:"id"`
+	Type      string `json:"type"`
+	IsRead    bool   `json:"is_read"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	ObjectID  string `json:"object_id"`
+	Reason    string `json:"reason"`
+	CreatedAt int64  `json:"created_at"`
 }
 
 type NotificationStatusResp struct {
@@ -30,8 +30,8 @@ type NotificationReadReq struct {
 }
 
 type NotificationListReq struct {
-	Page  int    `json:"page"`
-	Size  int    `json:"size"`
-	Type  string `json:"type,omitempty"`
+	Page      int    `json:"page"`
+	Size      int    `json:"size"`
+	Type      string `json:"type,omitempty"`
 	InboxType string `json:"inbox_type,omitempty"`
 }

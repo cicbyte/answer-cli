@@ -140,7 +140,7 @@ func runSearch(cli *client.Client, keyword string) {
 			obj := sr.Object
 			items = append(items, map[string]any{
 				"id": obj.ID, "title": obj.Title,
-				"answers": obj.AnswerCount,
+				"answers":    obj.AnswerCount,
 				"created_at": models.FormatTimestamp(obj.CreatedAt).Format("2006-01-02"),
 			})
 		}
@@ -179,7 +179,7 @@ func buildQuestionItems(list []models.QuestionListItem) []map[string]any {
 	for _, q := range list {
 		item := map[string]any{
 			"id": q.ID, "title": q.Title,
-			"answers": q.AnswerCount,
+			"answers":    q.AnswerCount,
 			"created_at": models.FormatTimestamp(q.CreatedAt).Format("2006-01-02"),
 		}
 		if q.Operator != nil {

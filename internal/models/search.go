@@ -11,15 +11,15 @@ type SearchResult struct {
 }
 
 type SearchObject struct {
-	ID         string `json:"id"`
-	QuestionID string `json:"question_id"`
-	Title      string `json:"title"`
-	Excerpt    string `json:"excerpt"`
-	VoteCount  int    `json:"vote_count"`
-	AnswerCount int   `json:"answer_count"`
-	Accepted   bool   `json:"accepted"`
-	CreatedAt  int64  `json:"created_at"`
-	StatusStr  string `json:"status"`
+	ID          string `json:"id"`
+	QuestionID  string `json:"question_id"`
+	Title       string `json:"title"`
+	Excerpt     string `json:"excerpt"`
+	VoteCount   int    `json:"vote_count"`
+	AnswerCount int    `json:"answer_count"`
+	Accepted    bool   `json:"accepted"`
+	CreatedAt   int64  `json:"created_at"`
+	StatusStr   string `json:"status"`
 }
 
 type SearchReq struct {

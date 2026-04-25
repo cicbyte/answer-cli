@@ -3,26 +3,26 @@ package models
 import "time"
 
 type QuestionPageResp struct {
-	Count int64               `json:"count"`
-	List  []QuestionListItem  `json:"list"`
+	Count int64              `json:"count"`
+	List  []QuestionListItem `json:"list"`
 }
 
 type QuestionListItem struct {
-	ID              string `json:"id"`
-	Title           string `json:"title"`
-	Content         string `json:"content"`
-	ViewCount       int    `json:"view_count"`
-	VoteCount       int    `json:"vote_count"`
-	AnswerCount     int    `json:"answer_count"`
-	CollectionCount int    `json:"collection_count"`
-	CommentCount    int    `json:"comment_count"`
-	Status          int    `json:"status"`
-	Pin             int    `json:"pin"`
-	AcceptedAnswerID string `json:"accepted_answer_id"`
-	CreatedAt       int64  `json:"created_at"`
-	UpdatedAt       int64  `json:"updated_at"`
-	Operator        *UserBasicInfo `json:"operator"`
-	Tags            []TagItem     `json:"tags"`
+	ID               string         `json:"id"`
+	Title            string         `json:"title"`
+	Content          string         `json:"content"`
+	ViewCount        int            `json:"view_count"`
+	VoteCount        int            `json:"vote_count"`
+	AnswerCount      int            `json:"answer_count"`
+	CollectionCount  int            `json:"collection_count"`
+	CommentCount     int            `json:"comment_count"`
+	Status           int            `json:"status"`
+	Pin              int            `json:"pin"`
+	AcceptedAnswerID string         `json:"accepted_answer_id"`
+	CreatedAt        int64          `json:"created_at"`
+	UpdatedAt        int64          `json:"updated_at"`
+	Operator         *UserBasicInfo `json:"operator"`
+	Tags             []TagItem      `json:"tags"`
 }
 
 func (q QuestionListItem) DisplayAuthor() string {
@@ -76,8 +76,8 @@ type QuestionDeleteReq struct {
 }
 
 type QuestionCloseReq struct {
-	ID       string `json:"id"`
-	CloseType int   `json:"close_type"`
+	ID        string `json:"id"`
+	CloseType int    `json:"close_type"`
 	CloseMsg  string `json:"close_msg,omitempty"`
 }
 

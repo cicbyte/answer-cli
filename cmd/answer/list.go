@@ -65,7 +65,7 @@ func runList(cmd *cobra.Command, args []string) {
 			}
 			item := map[string]any{
 				"id": a.ID, "author": author,
-				"accepted": a.Accepted == 1,
+				"accepted":   a.Accepted == 1,
 				"created_at": models.FormatTimestamp(a.CreatedAt).Format("2006-01-02"),
 			}
 			items = append(items, item)

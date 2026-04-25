@@ -1,8 +1,8 @@
 package models
 
 type AnswerListResp struct {
-	Count int64           `json:"count"`
-	List  []AnswerInfo    `json:"list"`
+	Count int64        `json:"count"`
+	List  []AnswerInfo `json:"list"`
 }
 
 type AnswerInfo struct {

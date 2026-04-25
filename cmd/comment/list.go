@@ -16,8 +16,8 @@ var (
 )
 
 var listCmd = &cobra.Command{
-	Use:     "list <object-id>",
-	Short:   "List comments for an object",
+	Use:   "list <object-id>",
+	Short: "List comments for an object",
 	Long: `List comments for a question or answer.
 
 Examples:

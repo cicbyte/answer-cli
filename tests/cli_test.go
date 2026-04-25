@@ -362,7 +362,7 @@ func TestCommentList_Empty(t *testing.T) {
 }
 
 func TestCommentList_WithQuestion(t *testing.T) {
-_ , _, code := cli(t, "comment", "list", "10010000000000073")
+	_, _, code := cli(t, "comment", "list", "10010000000000073")
 	assertExitZero(t, code, "")
 }
 

@@ -13,17 +13,17 @@ import (
 )
 
 type Client struct {
-	client        *resty.Client
-	baseURL       string
-	token         string
-	Comment       *CommentService
-	Tag           *TagService
-	Search        *SearchService
-	Notification  *NotificationService
-	User          *UserService
-	Vote          *VoteService
-	Question      *QuestionService
-	Answer        *AnswerService
+	client       *resty.Client
+	baseURL      string
+	token        string
+	Comment      *CommentService
+	Tag          *TagService
+	Search       *SearchService
+	Notification *NotificationService
+	User         *UserService
+	Vote         *VoteService
+	Question     *QuestionService
+	Answer       *AnswerService
 }
 
 type Config struct {
@@ -38,11 +38,11 @@ func NewClient(cfg *Config) *Client {
 	}
 
 	client := resty.New().
-		SetBaseURL(cfg.BaseURL + "/answer/api/v1").
+		SetBaseURL(cfg.BaseURL+"/answer/api/v1").
 		SetTimeout(cfg.Timeout).
 		SetRetryCount(3).
-		SetRetryWaitTime(500 * time.Millisecond).
-		SetRetryMaxWaitTime(5 * time.Second).
+		SetRetryWaitTime(500*time.Millisecond).
+		SetRetryMaxWaitTime(5*time.Second).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json")
 
@@ -94,9 +94,9 @@ func (c *Client) GetToken() string {
 
 // RespBody Answer API 统一响应结构
 type RespBody struct {
-	Code    int    `json:"code"`
-	Reason  string `json:"reason"`
-	Message string `json:"msg"`
+	Code    int             `json:"code"`
+	Reason  string          `json:"reason"`
+	Message string          `json:"msg"`
 	Data    json.RawMessage `json:"data"`
 }
 
