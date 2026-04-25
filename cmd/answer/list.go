@@ -83,23 +83,23 @@ func runList(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	items := make([]output.Item, len(resp.List))
-	for i, a := range resp.List {
-		author := ""
-		if a.UserInfo != nil {
+	headers := []string{"#", "采纳", "日期", "作者", "投票", "评论"}
+	var rows [][]string
+	for _, a := range resp.List {
+		author := "匿名"
+		if a.UserInfo != nil && a.UserInfo.DisplayName != "" {
 			author = a.UserInfo.DisplayName
 		}
 		date := models.FormatTimestamp(a.CreatedAt).Format("01-02")
 		accepted := ""
 		if a.Accepted == 1 {
-			accepted = " ✓"
+			accepted = "✓"
 		}
-		items[i] = output.Item{
-			Title:    a.ID + accepted,
-			Subtitle: fmt.Sprintf("%s  ↑%d  💬%d  %s", date, a.VoteCount, a.CommentCount, author),
-		}
+		rows = append(rows, []string{
+			a.ID, accepted, date, author,
+			fmt.Sprintf("%d", a.VoteCount), fmt.Sprintf("%d", a.CommentCount),
+		})
 	}
-
-	footer := fmt.Sprintf("共 %d 条（第 %d 页）", resp.Count, answerListPage)
-	output.PrintItems(items, footer)
+	output.PrintTableRight(headers, rows, 5, 6)
+	fmt.Printf("\n共 %d 条（第 %d 页）\n", resp.Count, answerListPage)
 }

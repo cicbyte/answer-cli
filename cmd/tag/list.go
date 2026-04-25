@@ -63,7 +63,7 @@ func runList(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	headers := []string{"Slug", "Name", "Questions", "Followers"}
+	headers := []string{"标签", "名称", "问题数", "关注数"}
 	var rows [][]string
 	for _, t := range resp.List {
 		rows = append(rows, []string{
@@ -74,6 +74,6 @@ func runList(cmd *cobra.Command, args []string) {
 		})
 	}
 
-	output.PrintTable(headers, rows)
-	fmt.Printf("\nTotal: %d (page %d, %d per page)\n", resp.Count, tagListPage, tagListSize)
+	output.PrintTableRight(headers, rows, 3, 4)
+	fmt.Printf("\n共 %d 条（第 %d 页）\n", resp.Count, tagListPage)
 }

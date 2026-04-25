@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/cicbyte/answer-cli/internal/client"
 	"github.com/cicbyte/answer-cli/internal/models"
@@ -97,25 +98,23 @@ func runPage(cli *client.Client) {
 		return
 	}
 
-	displayItems := make([]output.Item, len(resp.List))
-	for i, q := range resp.List {
-		author := ""
-		if q.UserInfo != nil {
-			author = q.UserInfo.DisplayName
-		}
+	headers := []string{"#", "标题", "日期", "作者", "投票", "回答", "标签"}
+	var rows [][]string
+	for _, q := range resp.List {
+		author := q.DisplayAuthor()
 		date := models.FormatTimestamp(q.CreatedAt).Format("01-02")
 		tags := make([]string, len(q.Tags))
 		for j, t := range q.Tags {
 			tags[j] = t.DisplayName
 		}
-		displayItems[i] = output.Item{
-			Title:    q.Title,
-			Subtitle: fmt.Sprintf("%s  %s  ↑%d  💬%d  #%s", date, author, q.VoteCount, q.AnswerCount, q.ID),
-			Tags:     tags,
-		}
+		rows = append(rows, []string{
+			q.ID, output.Truncate(q.Title, 40), date, author,
+			fmt.Sprintf("%d", q.VoteCount), fmt.Sprintf("%d", q.AnswerCount),
+			strings.Join(tags, ", "),
+		})
 	}
-
-	output.PrintItems(displayItems, fmt.Sprintf("共 %d 条（第 %d 页）", resp.Count, questionListPage))
+	output.PrintTableRight(headers, rows, 5, 6)
+	fmt.Printf("\n共 %d 条（第 %d 页）\n", resp.Count, questionListPage)
 }
 
 func runSearch(cli *client.Client, keyword string) {
@@ -158,20 +157,21 @@ func runSearch(cli *client.Client, keyword string) {
 		return
 	}
 
-	displayItems := make([]output.Item, 0, len(resp.List))
+	headers := []string{"#", "标题", "日期", "投票", "回答"}
+	var rows [][]string
 	for _, sr := range resp.List {
 		if sr.Object == nil {
 			continue
 		}
 		obj := sr.Object
 		date := models.FormatTimestamp(obj.CreatedAt).Format("01-02")
-		displayItems = append(displayItems, output.Item{
-			Title:    obj.Title,
-			Subtitle: fmt.Sprintf("%s  ↑%d  💬%d", date, obj.VoteCount, obj.AnswerCount),
+		rows = append(rows, []string{
+			obj.ID, output.Truncate(obj.Title, 40), date,
+			fmt.Sprintf("%d", obj.VoteCount), fmt.Sprintf("%d", obj.AnswerCount),
 		})
 	}
-
-	output.PrintItems(displayItems, fmt.Sprintf("共 %d 条", resp.Count))
+	output.PrintTableRight(headers, rows, 4, 5)
+	fmt.Printf("\n共 %d 条\n", resp.Count)
 }
 
 func buildQuestionItems(list []models.QuestionListItem) []map[string]any {
@@ -182,8 +182,8 @@ func buildQuestionItems(list []models.QuestionListItem) []map[string]any {
 			"answers": q.AnswerCount,
 			"created_at": models.FormatTimestamp(q.CreatedAt).Format("2006-01-02"),
 		}
-		if q.UserInfo != nil {
-			item["author"] = q.UserInfo.DisplayName
+		if q.Operator != nil {
+			item["author"] = q.Operator.DisplayName
 		}
 		if len(q.Tags) > 0 {
 			tags := make([]string, len(q.Tags))

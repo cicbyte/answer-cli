@@ -52,31 +52,26 @@ func runStatus(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	fmt.Println("状态: 已认证")
+	fmt.Println("状态: 已认证 ✓")
+
 	fmt.Println()
-
-	// 以表格形式显示用户信息
-	headers := []string{"字段", "值"}
-	rows := [][]string{
-		{"用户名", user.Username},
-		{"显示名", user.DisplayName},
-		{"邮箱", user.EMail},
-		{"等级", fmt.Sprintf("%d", user.Rank)},
-		{"提问数", fmt.Sprintf("%d", user.QuestionCount)},
-		{"回答数", fmt.Sprintf("%d", user.AnswerCount)},
-		{"关注数", fmt.Sprintf("%d", user.FollowCount)},
-		{"管理员", fmt.Sprintf("%v", user.IsAdmin)},
+	fmt.Printf("  用户名  %s\n", user.Username)
+	fmt.Printf("  显示名  %s\n", user.DisplayName)
+	if user.EMail != "" {
+		fmt.Printf("  邮箱    %s\n", user.EMail)
 	}
-
+	fmt.Printf("  等级    %d\n", user.Rank)
+	fmt.Printf("  提问    %d  回答 %d  关注 %d\n", user.QuestionCount, user.AnswerCount, user.FollowCount)
+	if user.IsAdmin {
+		fmt.Printf("  管理员  true\n")
+	}
 	if user.Bio != "" {
-		rows = append(rows, []string{"简介", output.Truncate(user.Bio, 60)})
+		fmt.Printf("  简介    %s\n", output.Truncate(user.Bio, 60))
 	}
 	if user.Website != "" {
-		rows = append(rows, []string{"网站", user.Website})
+		fmt.Printf("  网站    %s\n", user.Website)
 	}
 	if user.Location != "" {
-		rows = append(rows, []string{"位置", user.Location})
+		fmt.Printf("  位置    %s\n", user.Location)
 	}
-
-	output.PrintTable(headers, rows)
 }

@@ -21,8 +21,18 @@ type QuestionListItem struct {
 	AcceptedAnswerID string `json:"accepted_answer_id"`
 	CreatedAt       int64  `json:"created_at"`
 	UpdatedAt       int64  `json:"updated_at"`
-	UserInfo        *UserBasicInfo `json:"user_info"`
+	Operator        *UserBasicInfo `json:"operator"`
 	Tags            []TagItem     `json:"tags"`
+}
+
+func (q QuestionListItem) DisplayAuthor() string {
+	if q.Operator != nil && q.Operator.DisplayName != "" {
+		return q.Operator.DisplayName
+	}
+	if q.Operator != nil && q.Operator.Username != "" {
+		return q.Operator.Username
+	}
+	return "匿名"
 }
 
 type QuestionInfoResp struct {

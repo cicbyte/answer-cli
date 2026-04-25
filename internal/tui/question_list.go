@@ -182,8 +182,8 @@ func (m appModel) viewQuestionList() string {
 
 		date := models.FormatTimestamp(q.CreatedAt).Format("01-02")
 		author := ""
-		if q.UserInfo != nil {
-			author = q.UserInfo.DisplayName
+		if q.Operator != nil {
+			author = q.Operator.DisplayName
 		}
 
 		meta := styleMuted.Render(fmt.Sprintf("#%s  %s  %s  %s", q.ID, date, author, tags))
