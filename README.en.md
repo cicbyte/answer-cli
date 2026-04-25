@@ -162,7 +162,9 @@ answer-cli config list
 }
 ```
 
-**Cherry Studio:** Settings → Model Services → MCP Servers → Add, command `answer-cli`, args `mcp`
+**Cherry Studio:** Settings → MCP Servers, command `answer-cli`, args `mcp`; or install answer-cli skill in Settings → Skills
+
+![Cherry Studio Query Example](images/cherry-studio-skill-query.png)
 
 ## Tech Stack
 

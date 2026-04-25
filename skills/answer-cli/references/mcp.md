@@ -1,6 +1,6 @@
 # MCP Server
 
-以 stdio 模式运行，让 AI 客户端（Cherry Studio、Claude Desktop、Cursor 等）搜索和操作本地备忘录。
+以 stdio 模式运行，让 AI 客户端（Claude Desktop、Cherry Studio 等）搜索和操作 Answer 社区数据。
 
 ## 启动
 
@@ -12,51 +12,34 @@ answer-cli mcp
 
 | Tool | 描述 | 参数 |
 |------|------|------|
-| `memo_search` | 按关键词、标签搜索 | `keywords`、`tags`、`limit`、`start_time`、`end_time` |
-| `memo_semantic_search` | 语义搜索（需 embedding 服务） | `query`、`start_time`、`end_time`、`limit` |
-| `memo_get` | 获取单条备忘录 | `memo_id` |
-| `memo_create` | 创建备忘录 | `content`、`visibility` |
-| `memo_stats` | 统计概览 | 无 |
+| `question_search` | 搜索问题 | `keyword`、`tag`、`order`、`limit` |
+| `question_get` | 获取问题详情 | `question_id` |
+| `answer_list` | 列出问题的回答 | `question_id`、`limit` |
+| `tag_search` | 搜索标签 | `query` |
+| `tag_get` | 获取标签详情 | `slug_name` |
+| `user_search` | 搜索用户 | `username` |
 
 ## 客户端配置
 
+### Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "answer": {
+      "command": "answer-cli",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
 ### Cherry Studio
 
-设置 -> 模型服务 -> MCP 服务器 -> 添加：
-- 名称：`memos`
+设置 → 模型服务 → MCP 服务器 → 添加：
 - 命令：`answer-cli`
 - 参数：`mcp`
 
-### Claude Desktop
-
-`claude_desktop_config.json`：
-```json
-{
-  "mcpServers": {
-    "memos": {
-      "command": "answer-cli",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
-### Cursor
-
-`.cursor/mcp.json`：
-```json
-{
-  "mcpServers": {
-    "memos": {
-      "command": "answer-cli",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
 ## 前置条件
 
-- 已配置服务器并同步过数据
-- 语义搜索需要 embedding 服务
-- 创建备忘录需要已登录
+- 已配置 Answer 服务器并完成认证

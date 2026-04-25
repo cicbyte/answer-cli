@@ -162,7 +162,9 @@ answer-cli config list
 }
 ```
 
-**Cherry Studio：** 设置 → 模型服务 → MCP 服务器 → 添加，命令 `answer-cli`，参数 `mcp`
+**Cherry Studio：** 设置 → MCP 服务器，命令 `answer-cli`，参数 `mcp`；或在设置 → 技能中安装 answer-cli skill
+
+![Cherry Studio 查询示例](images/cherry-studio-skill-query.png)
 
 ## 技术栈
 
