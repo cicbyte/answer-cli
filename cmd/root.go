@@ -14,8 +14,6 @@ import (
 	"github.com/cicbyte/answer-cli/cmd/question"
 	"github.com/cicbyte/answer-cli/cmd/search"
 	"github.com/cicbyte/answer-cli/cmd/tag"
-	"github.com/cicbyte/answer-cli/cmd/user"
-	"github.com/cicbyte/answer-cli/cmd/vote"
 	"github.com/cicbyte/answer-cli/internal/common"
 	"github.com/cicbyte/answer-cli/internal/log"
 	"github.com/cicbyte/answer-cli/internal/tui"
@@ -72,8 +70,6 @@ func init() {
 	rootCmd.AddCommand(tag.GetTagCommand())
 	rootCmd.AddCommand(search.GetSearchCommand())
 	rootCmd.AddCommand(notification.GetNotificationCommand())
-	rootCmd.AddCommand(user.GetUserCommand())
-	rootCmd.AddCommand(vote.GetVoteCommand())
 	rootCmd.AddCommand(mcp.GetMcpCommand())
 	rootCmd.AddCommand(chat.GetChatCommand())
 

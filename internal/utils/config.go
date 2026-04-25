@@ -27,6 +27,10 @@ func (c *Config) GetHomeDir() string {
 	if c.HomeDir != "" {
 		return c.HomeDir
 	}
+	if dir := os.Getenv("ANSWER_CLI_HOME"); dir != "" {
+		c.HomeDir = dir
+		return c.HomeDir
+	}
 	usr, err := user.Current()
 	if err != nil {
 		if dir, e := os.UserHomeDir(); e == nil {

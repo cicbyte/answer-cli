@@ -59,9 +59,9 @@ type QuestionInfoResp struct {
 }
 
 type QuestionAddReq struct {
-	Title       string   `json:"title"`
-	Content     string   `json:"content"`
-	Tags        []string `json:"tags,omitempty"`
+	Title   string      `json:"title"`
+	Content string      `json:"content"`
+	Tags    []TagAddReq `json:"tags,omitempty"`
 }
 
 type QuestionUpdateReq struct {

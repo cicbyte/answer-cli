@@ -82,10 +82,10 @@ func runCreate(cmd *cobra.Command, args []string) {
 
 	if questionCreateTags != "" {
 		tags := strings.Split(questionCreateTags, ",")
-		for i, tag := range tags {
-			tags[i] = strings.TrimSpace(tag)
+		for _, tag := range tags {
+			tag = strings.TrimSpace(tag)
+			req.Tags = append(req.Tags, models.TagAddReq{SlugName: tag, DisplayName: tag})
 		}
-		req.Tags = tags
 	}
 
 	result, err := cli.Question.Add(context.Background(), req)
