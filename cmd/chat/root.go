@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/cicbyte/answer-cli/internal/ai"
 	"github.com/cicbyte/answer-cli/internal/client"
@@ -63,18 +64,23 @@ func askWithHistory(svc *ai.AIService, ctx context.Context, question string, his
 		return resp.Answer, nil
 	}
 
+	start := time.Now()
 	var buf strings.Builder
+	var promptTokens, completionTokens int
 
 	err := svc.AskStream(ctx, question, history, func(event ai.StreamEvent) {
 		switch event.Type {
 		case "content":
 			buf.WriteString(event.Content)
 		case "tool_call":
-			fmt.Printf("\n%s 🔍 %s...\n", output.Dim("─"), event.Tool)
+			fmt.Printf("  %s %s\n", output.Dim("▸"), event.Tool)
 		case "tool_result":
-			fmt.Printf("%s ✓ %s\n", output.Dim("─"), event.Content)
+			fmt.Printf("  %s %s\n", output.Dim("✓"), event.Content)
+		case "done":
+			promptTokens = event.PromptTokens
+			completionTokens = event.CompletionTokens
 		case "error":
-			fmt.Printf("\n%s 错误: %s\n", output.Dim("─"), event.Content)
+			fmt.Printf("  %s\n", output.Dim("✗ "+event.Content))
 		}
 	})
 
@@ -89,17 +95,25 @@ func askWithHistory(svc *ai.AIService, ctx context.Context, question string, his
 	}
 
 	fmt.Print(output.RenderMarkdown(raw))
+
+	if promptTokens > 0 || completionTokens > 0 {
+		elapsed := time.Since(start)
+		fmt.Printf("\n%s\n", output.Dim(fmt.Sprintf("Tokens: %d + %d · %.1fs",
+			promptTokens, completionTokens, elapsed.Seconds())))
+	}
+
 	return raw, nil
 }
 
 func runInteractive(svc *ai.AIService, ctx context.Context, nonStream bool) error {
-	fmt.Println("AI 对话模式（输入 /quit 或 Ctrl+C 退出）")
-	fmt.Println("---")
+	fmt.Println(output.Bold(" AI 对话模式"))
+	fmt.Println(output.Dim("  输入问题开始对话，/quit 退出，/clear 清除上下文"))
+	fmt.Println()
 
 	var history []ai.ChatMessage
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Print("> ")
+		fmt.Print(output.Bold("  user > "))
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			break
@@ -109,17 +123,19 @@ func runInteractive(svc *ai.AIService, ctx context.Context, nonStream bool) erro
 			continue
 		}
 		if line == "/quit" || line == "/exit" || line == "/q" {
+			fmt.Println(output.Dim("  再见!"))
 			break
 		}
 		if line == "/clear" {
 			history = nil
-			fmt.Println(output.Dim("已清除对话上下文"))
+			fmt.Println(output.Dim("  对话上下文已清除"))
+			fmt.Println()
 			continue
 		}
 
 		resp, err := askWithHistory(svc, ctx, line, history, nonStream)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "错误: %v\n", err)
+			fmt.Fprintf(os.Stderr, "  错误: %v\n", err)
 			fmt.Println()
 			continue
 		}

@@ -171,6 +171,10 @@ func Dim(s string) string {
 	return "\x1b[2m" + s + "\x1b[0m"
 }
 
+func Bold(s string) string {
+	return "\x1b[1m" + s + "\x1b[0m"
+}
+
 func GetTermSize() (int, int, error) {
 	w, h, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {

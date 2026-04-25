@@ -62,6 +62,8 @@ answer-cli chat "How to handle goroutine leaks?"  # AI chat
 
 ### Questions
 
+![Question List](images/question_list.png)
+
 ```bash
 answer-cli question list                          # List questions
 answer-cli question list --order hot              # Sort by hot
@@ -88,6 +90,10 @@ answer-cli chat "question"                        # Single-turn
 answer-cli chat -i                                # Interactive multi-turn
 ```
 
+![AI Chat](images/aichat.png)
+
+![AI Chat Interactive](images/aichat-loop.png)
+
 The AI Agent uses 5 function tools to search community content (search questions, get details, list answers, search tags, search users), automatically selecting the best retrieval strategy before generating an answer.
 
 ### Global Options
@@ -104,6 +110,8 @@ Launch the Bubbletea terminal UI with no arguments:
 ```bash
 answer-cli
 ```
+
+![TUI Browser Mode](images/tui.png)
 
 | Key | Action |
 |-----|--------|

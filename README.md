@@ -62,6 +62,8 @@ answer-cli chat "如何处理 goroutine 泄露？"  # AI 对话
 
 ### 问题
 
+![问题列表](images/question_list.png)
+
 ```bash
 answer-cli question list                          # 列出问题
 answer-cli question list --order hot              # 按热门排序
@@ -88,6 +90,10 @@ answer-cli chat "问题"                            # 单轮对话
 answer-cli chat -i                                # 多轮交互对话
 ```
 
+![AI 单次对话](images/aichat.png)
+
+![AI 多轮对话](images/aichat-loop.png)
+
 AI Agent 通过 5 个 function tools 检索社区内容（搜索问题、获取详情、列出回答、搜索标签、搜索用户），自动选择检索策略后生成回答。
 
 ### 全局选项
@@ -104,6 +110,8 @@ answer-cli question list --format jsonl          # JSONL 逐行输出
 ```bash
 answer-cli
 ```
+
+![TUI 浏览模式](images/tui.png)
 
 | 按键 | 功能 |
 |------|------|
