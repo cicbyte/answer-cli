@@ -2,16 +2,19 @@ package tui
 
 import (
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 func overlayError(base string, err error) string {
-	msg := styleError.Render("错误: ") + err.Error()
+	msg := styleError.Render("错误: ") + err.Error() + "\n" + styleMuted.Render("Enter/Esc 关闭  Ctrl+C 退出")
 	box := styleErrorBox.Render(msg)
 	boxLines := strings.Split(box, "\n")
 	w := 0
 	for _, l := range boxLines {
-		if len(l) > w {
-			w = len(l)
+		lw := lipgloss.Width(l)
+		if lw > w {
+			w = lw
 		}
 	}
 	return overlayCenter(base, box, w)
@@ -20,31 +23,36 @@ func overlayError(base string, err error) string {
 func overlayCenter(base, overlay string, w int) string {
 	baseLines := strings.Split(base, "\n")
 	overlayLines := strings.Split(overlay, "\n")
-	maxW := 0
+
+	termW := 80
 	for _, l := range baseLines {
-		if len(l) > maxW {
-			maxW = len(l)
+		lw := lipgloss.Width(l)
+		if lw > termW {
+			termW = lw
 		}
+
 	}
 
 	startY := (len(baseLines) - len(overlayLines)) / 2
 	if startY < 0 {
 		startY = 0
 	}
-	startX := (maxW - w) / 2
-	if startX < 0 {
-		startX = 0
+	startX := max((termW-w)/2, 0)
+
+	pad := strings.Repeat(" ", startX)
+	result := make([]string, len(baseLines))
+	for i, line := range baseLines {
+		lw := lipgloss.Width(line)
+		result[i] = line + strings.Repeat(" ", max(termW-lw, 0))
 	}
 
-	result := make([]string, len(baseLines))
-	copy(result, baseLines)
 	for i, line := range overlayLines {
 		y := startY + i
 		if y >= len(result) {
 			break
 		}
-		pad := strings.Repeat(" ", startX)
-		result[y] = result[y] + pad + line
+		result[y] = pad + line + strings.Repeat(" ", max(termW-startX-lipgloss.Width(line), 0))
 	}
+
 	return strings.Join(result, "\n")
 }

@@ -13,11 +13,16 @@ import (
 	"github.com/cicbyte/answer-cli/internal/models"
 )
 
-func RunTUI() error {
+func RunTUI() (err error) {
 	cli, err := NewTUIClient()
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("TUI panic: %v", r)
+		}
+	}()
 	p := tea.NewProgram(NewAppModel(cli), tea.WithAltScreen(), tea.WithMouseAllMotion())
 	_, err = p.Run()
 	return err
@@ -100,23 +105,25 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		if m.editorActive {
-			return m.updateEditor(msg)
-		}
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
 		if m.err != nil {
+			m.editorActive = false
 			if msg.String() == "enter" || msg.String() == "esc" {
 				m.err = nil
 				return m, nil
 			}
 			return m, nil
 		}
+		if m.editorActive {
+			return m.updateEditor(msg)
+		}
 
 	case apiErrorMsg:
 		m.dLoading = false
 		m.qLoading = false
+		m.editorActive = false
 		if client.IsUnauthorizedError(msg.err) {
 			m.err = fmt.Errorf("未登录或登录已过期，请先执行: answer-cli auth login")
 			return m, nil
@@ -129,8 +136,11 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case voteResultMsg:
+		m.editorActive = false
 		if msg.err != nil {
 			m.err = msg.err
+		} else if m.activeView == viewQuestionDetail && m.question != nil {
+			return m, loadQuestionDetailCmd(m.cli, m.question.ID)
 		}
 		return m, nil
 	}

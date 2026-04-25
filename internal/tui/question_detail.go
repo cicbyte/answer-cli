@@ -104,6 +104,23 @@ func (m appModel) updateQuestionDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.comments[cm.objectID] = cm.comments
 		m.detailContent = m.buildDetailContent()
 		m.viewport.SetContent(m.detailContent)
+	} else if aa, ok := msg.(answerAddedMsg); ok {
+		m.editorActive = false
+		if aa.err != nil {
+			m.err = aa.err
+		} else if m.question != nil {
+			cmds = append(cmds, loadAnswersCmd(m.cli, m.question.ID))
+		}
+	} else if cc, ok := msg.(commentAddedMsg); ok {
+		m.editorActive = false
+		if cc.err != nil {
+			m.err = cc.err
+		} else if m.question != nil {
+			cmds = append(cmds, loadCommentsCmd(m.cli, m.question.ID))
+			if m.editorTarget != m.question.ID {
+				cmds = append(cmds, loadCommentsCmd(m.cli, m.editorTarget))
+			}
+		}
 	}
 
 	if len(cmds) > 0 {

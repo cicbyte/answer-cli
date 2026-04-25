@@ -3,6 +3,7 @@ package tui
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/bubbles/textarea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func newEditorTextarea(placeholder string) textarea.Model {
@@ -56,7 +57,7 @@ func overlayEditor(base string, m appModel) string {
 			styleMuted.Render("Ctrl+S:提交  Esc:取消"),
 	)
 
-	w := len(box)
+	w := lipgloss.Width(box)
 	if w <= 0 {
 		w = 60
 	}
