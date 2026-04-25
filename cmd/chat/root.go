@@ -64,24 +64,17 @@ func askWithHistory(svc *ai.AIService, ctx context.Context, question string, his
 	}
 
 	var buf strings.Builder
-	var rawLines int
 
 	err := svc.AskStream(ctx, question, history, func(event ai.StreamEvent) {
 		switch event.Type {
 		case "content":
-			fmt.Print(event.Content)
 			buf.WriteString(event.Content)
-			rawLines += strings.Count(event.Content, "\n")
 		case "tool_call":
 			fmt.Printf("\n%s 🔍 %s...\n", output.Dim("─"), event.Tool)
-			buf.WriteString("\n")
-			rawLines++
 		case "tool_result":
 			fmt.Printf("%s ✓ %s\n", output.Dim("─"), event.Content)
-			rawLines++
 		case "error":
 			fmt.Printf("\n%s 错误: %s\n", output.Dim("─"), event.Content)
-			rawLines++
 		}
 	})
 
@@ -95,17 +88,8 @@ func askWithHistory(svc *ai.AIService, ctx context.Context, question string, his
 		return "", nil
 	}
 
-	moveUpAndClear(rawLines)
 	fmt.Print(output.RenderMarkdown(raw))
 	return raw, nil
-}
-
-func moveUpAndClear(lines int) {
-	if lines <= 0 {
-		return
-	}
-	fmt.Printf("\033[%dA", lines)
-	fmt.Printf("\033[J")
 }
 
 func runInteractive(svc *ai.AIService, ctx context.Context, nonStream bool) error {
