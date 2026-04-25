@@ -1,29 +1,19 @@
 # answer-cli
 
-[Memos](https://github.com/usememos/memos) 的命令行工具。将远程备忘录同步到本地 SQLite，通过 CLI 或 AI Skill 让 AI 以最少 token、最稳定的方式检索你的笔记。
+> Apache Answer Q&A 社区的命令行工具 — 浏览问答、搜索内容、AI 对话、MCP 集成，全部在终端完成。
 
-**为什么需要它？**
 
-- **Memos 是轻量备忘录的事实标准，CLI 补齐它不覆盖的场景** — 终端操作、AI 集成、自动化脚本
-- **AI 时代 CLI 比 MCP 更实用** — MCP 每次调用传输工具定义，token 开销大；Skill 教 AI 直接执行 `memo list --from=2026-03-01`，输出精简可控，节省 token
-- **本地缓存 = 可靠性** — 同步一次后稳定可用，不受网络超时、API 限流影响
 
 ## 功能特性
 
-- **TUI 交互界面** — 基于 Bubbletea 的终端 UI，支持浏览、创建、编辑、搜索 memo
-- **CLI 子命令** — 通过 Cobra 命令直接操作，适合脚本和自动化
-- **服务器管理** — 添加、切换、删除多个 Memos 服务器配置
-- **智能同步** — 增量同步远程备忘录到本地 SQLite，自动 MD5 去重
-- **AI 对话** — Agent 模式，LLM 自动选择检索方式（数据库查询 / 向量搜索），流式输出，Markdown 渲染，支持单轮和多轮对话
-- **MCP Server** — stdio 模式的 MCP Server，让 Cherry Studio、Claude Desktop 等 AI 客户端直接搜索和操作本地备忘录
-- **配置管理** — 统一管理 AI、Embedding、日志等应用配置
-- **多提供商支持** — AI 支持 OpenAI、Ollama、智谱等 OpenAI 兼容 API
+- **TUI 浏览模式** — 无参数启动进入 Bubbletea 终端 UI，搜索、浏览问题详情与回答，支持 Markdown 渲染
+- **完整 CLI 命令** — 问答、评论、标签、通知、用户、投票的 CRUD 操作，适合脚本和自动化
+- **AI 对话** — 基于 API 搜索的 tool calling，LLM 自动检索社区内容并生成回答
+- **MCP Server** — stdio 模式，让 Claude Desktop、Cherry Studio 等 AI 客户端直接操作社区数据
+- **多格式输出** — 支持 pretty / JSON / JSONL 格式，`--format` 全局切换
+- **多 AI 提供商** — OpenAI、Ollama、智谱等 OpenAI 兼容 API
 
 ## 安装
-
-### 从 Release 下载
-
-前往 [Releases](https://github.com/cicbyte/answer-cli/releases) 下载对应平台的预编译二进制文件。
 
 ### 从源码构建
 
@@ -33,77 +23,153 @@ cd answer-cli
 go build -o answer-cli .
 ```
 
-交叉编译：
+交叉编译（需 Python 3，可选 UPX）：
 
 ```bash
 python scripts/build.py --local    # 当前平台
 python scripts/build.py             # 全平台（Windows/Linux/macOS）
 ```
 
+### 环境要求
+
+- Go >= 1.24
+- Apache Answer 实例（自建或 [answer.apache.org](https://answer.apache.org)）
+
 ## 快速开始
 
 ```bash
-# 添加 Memos 服务器配置
-answer-cli server add
+# 配置服务器地址
+answer-cli config set server.base_url https://your-answer-site.com
 
-# 登录服务器
+# 登录
 answer-cli auth login
 
-# 同步远程 memo 到本地
-answer-cli sync
+# 列出问题（TUI 浏览模式）
+answer-cli
 
-# 与备忘录对话
-answer-cli chat "我上周有哪些工作计划？"
+# 搜索
+answer-cli search "golang 并发"
 
-# 启动 TUI 交互界面
+# AI 对话
+answer-cli chat "如何处理 goroutine 泄露？"
+```
+
+## 使用方法
+
+### TUI 浏览模式
+
+无参数启动进入 TUI 界面：
+
+```bash
 answer-cli
 ```
 
-## 命令一览
+| 按键 | 功能 |
+|------|------|
+| `↑↓` / `j/k` | 移动光标 / 滚动 |
+| `Enter` | 进入详情 |
+| `/` | 搜索 |
+| `Tab` | 切换排序（最新/活跃/热门/评分） |
+| `n` / `p` | 翻页 |
+| `v` | 投票 |
+| `r` | 写回答 |
+| `c` | 写评论 |
+| `g` / `G` | 跳顶部 / 底部 |
+| `Esc` | 返回 |
+| `q` | 退出 |
+
+### 问题
+
+```bash
+answer-cli question list              # 列出问题
+answer-cli question list --order hot  # 按热门排序
+answer-cli question get <id>          # 查看详情（含回答、Markdown 渲染）
+answer-cli question create --title="..." --content="..."
+answer-cli question update <id> --title="..."
+answer-cli question delete <id>
+```
+
+### 搜索
+
+```bash
+answer-cli search "关键词"
+```
+
+### 评论 / 标签 / 通知 / 用户 / 投票
+
+```bash
+answer-cli comment list --object-id <id> --object-type question
+answer-cli comment add --object-id <id> --object-type question --content="..."
+answer-cli tag list
+answer-cli tag search "golang"
+answer-cli notification list
+answer-cli user get <username>
+answer-cli vote up --object-id <id> --object-type question
+```
+
+### AI 对话
+
+```bash
+answer-cli chat "问题"                   # 单轮对话
+answer-cli chat -i                       # 多轮交互对话
+```
+
+AI Agent 通过 5 个 function tools 检索社区内容（搜索问题、获取详情、列出回答、搜索标签、搜索用户），自动选择检索策略后生成回答。
+
+### 全部命令
+
+```bash
+answer-cli --help
+```
 
 | 命令 | 说明 |
 |------|------|
-| `answer-cli` | 启动 TUI 交互界面 |
-| `answer-cli mcp` | 启动 MCP Server |
-| `answer-cli chat [问题]` | 与备忘录 AI 对话（默认单轮，`-i` 多轮） |
-| `answer-cli memo list` | 列出备忘录列表 |
-| `answer-cli memo stats` | 备忘录统计概览 |
-| `answer-cli memo get <id>` | 查看 memo 详情 |
-| `answer-cli memo create` | 创建 memo（支持管道输入） |
-| `answer-cli memo update <id>` | 更新 memo |
-| `answer-cli memo delete <id>` | 删除 memo |
-| `answer-cli sync` | 同步远程备忘录到本地 |
-| `answer-cli sync status` | 查看同步状态 |
-| `answer-cli server add` | 添加服务器配置 |
-| `answer-cli server list` | 列出服务器配置 |
-| `answer-cli server default <name>` | 设置默认服务器 |
-| `answer-cli server remove <name>` | 删除服务器配置 |
-| `answer-cli config list` | 查看应用配置项 |
-| `answer-cli config get <key>` | 查看配置值 |
-| `answer-cli config set <key> <value>` | 设置配置项 |
-| `answer-cli auth login` | 登录服务器 |
-| `answer-cli auth logout` | 登出服务器 |
-| `answer-cli auth status` | 查看认证状态 |
+| `auth login` / `logout` / `status` | 认证管理 |
+| `config list` / `get` / `set` | 配置管理 |
+| `question list` / `get` / `create` / `update` / `delete` | 问题 CRUD |
+| `answer list` / `get` / `create` / `update` / `delete` | 回答 CRUD |
+| `comment list` / `add` / `update` / `delete` | 评论 CRUD |
+| `tag list` / `search` / `get` / `info` | 标签查询 |
+| `search <query>` | 全文搜索 |
+| `notification list` | 通知列表 |
+| `user get` / `search` | 用户查询 |
+| `vote up` / `down` | 投票 |
+| `chat [question]` | AI 对话 |
+| `mcp` | 启动 MCP Server |
+
+## 配置
+
+配置文件路径：`~/.cicbyte/answer-cli/config/config.yaml`（首次运行自动创建）。
+
+```yaml
+server:
+  base_url: https://your-answer-site.com
+token: your-access-token
+
+ai:
+  provider: openai          # openai / ollama / zhipu
+  base_url: https://api.openai.com/v1
+  api_key: sk-xxx
+  model: gpt-4o
+```
+
+也可通过命令设置：
+
+```bash
+answer-cli config set server.base_url https://your-answer-site.com
+answer-cli config list
+```
 
 ## MCP Server
 
-`answer-cli mcp` 以 stdio 模式运行 MCP Server，让 AI 客户端能直接搜索和操作本地备忘录。
-
-注册的 Tools：`memo_search`、`memo_semantic_search`、`memo_get`、`memo_create`、`memo_stats`
-
-**Cherry Studio 配置：**
-
-设置 → 模型服务 → MCP 服务器 → 添加：
-- 名称：`memos`
-- 命令：`answer-cli`
-- 参数：`mcp`
+`answer-cli mcp` 以 stdio 模式运行 MCP Server，注册 6 个工具：`question_search`、`question_get`、`answer_list`、`tag_search`、`tag_get`、`user_search`。
 
 **Claude Desktop 配置：**
 
 ```json
 {
   "mcpServers": {
-    "memos": {
+    "answer": {
       "command": "answer-cli",
       "args": ["mcp"]
     }
@@ -111,102 +177,23 @@ answer-cli
 }
 ```
 
-## AI 配置
+**Cherry Studio 配置：**
 
-通过 `answer-cli config set` 或直接编辑 `~/.cicbyte/answer-cli/config/config.yaml` 配置。
-
-**OpenAI：**
-
-```yaml
-ai:
-  provider: openai
-  base_url: https://api.openai.com/v1
-  api_key: sk-xxx
-  model: gpt-4o
-```
-
-**Ollama（本地，默认）：**
-
-```yaml
-ai:
-  provider: ollama
-  base_url: http://localhost:11434/v1
-  model: gemma4:e4b
-```
-
-**智谱：**
-
-```yaml
-ai:
-  provider: zhipu
-  base_url: https://open.bigmodel.cn/api/paas/v4
-  api_key: xxx
-  model: glm-4
-```
-
-Embedding 配置结构相同，使用 `embedding` 字段。
-
-## 检索模式
-
-`chat` 命令支持三种检索模式，通过 `-m` 指定：
-
-| 模式 | 说明 | 依赖 |
-|------|------|------|
-| `auto`（默认） | LLM 自动选择数据库查询或向量搜索 | AI 服务 |
-| `db` | 仅数据库查询（关键词/标签/时间） | 仅数据库 |
-| `vector` | 仅向量语义搜索 | AI + Embedding 服务 |
-
-## 管道输入
-
-`memo create` 支持管道输入，优先级：`--content` / `--file` > 管道输入 > 交互式输入。
-
-```bash
-echo "内容" | answer-cli memo create
-cat note.md | answer-cli memo create
-answer-cli memo create --content="直接指定内容"
-```
-
-## 数据存储
-
-所有数据存储在 `~/.cicbyte/answer-cli/` 目录下：
-
-```
-~/.cicbyte/answer-cli/
-├── config/
-│   └── config.yaml    # 应用配置
-├── db/
-│   └── app.db         # SQLite 数据库
-└── logs/
-    └── app.log        # 日志文件（自动轮转）
-```
+设置 → 模型服务 → MCP 服务器 → 添加：
+- 名称：`answer`
+- 命令：`answer-cli`
+- 参数：`mcp`
 
 ## 技术栈
 
 - Go 1.24
-- [Bubbletea](https://github.com/charmbracelet/bubbletea) / [Lipgloss](https://github.com/charmbracelet/lipgloss) / [Glamour](https://github.com/charmbracelet/glamour) — TUI 框架 + Markdown 渲染
+- [Bubbletea](https://github.com/charmbracelet/bubbletea) + [Bubbles](https://github.com/charmbracelet/bubbles) + [Lipgloss](https://github.com/charmbracelet/lipgloss) + [Glamour](https://github.com/charmbracelet/glamour) — TUI 框架
 - [Cobra](https://github.com/spf13/cobra) — CLI 框架
 - [mcp-go](https://github.com/mark3labs/mcp-go) — MCP Server
-- [GORM](https://gorm.io/) + SQLite — 数据持久化
-- [go-openai](https://github.com/sashabaranov/go-openai) — OpenAI 兼容 API 客户端（function calling）
-- [Resty](https://github.com/go-resty/resty) — HTTP 客户端（Embedding）
-- [Zap](https://github.com/uber-go/zap) — 结构化日志
-
-## AI Skill
-
-项目附带 `answer-cli` skill，指导 AI 正确使用 answer-cli 命令。skill 文件位于 `skills/answer-cli/`，可通过 junction 链接到 `.claude/skills/` 供 Claude Code 使用：
-
-```bash
-powershell -Command "New-Item -ItemType Junction -Path '.claude\skills\answer-cli' -Target 'skills\answer-cli'"
-```
-
-Skill 会自动约束 AI 的行为：
-- 禁止启动交互式 TUI（`answer-cli` 无参数）
-- 禁止执行需要交互式输入的命令（如无参数的 `auth login`、`server add`）
-- 禁止修改配置（`config set`）
-- 只允许执行非交互式的只读/写入命令（`memo list`、`memo get`、`memo create -c "..."`、`sync`、`chat "问题"` 等）
-
-也可在 Cherry Studio 等 AI 客户端中作为 MCP 上下文使用。
+- [go-openai](https://github.com/sashabaranov/go-openai) — OpenAI 兼容 API（function calling）
+- [Resty](https://github.com/go-resty/resty) — HTTP 客户端
+- [go-pretty](https://github.com/jedib0t/go-pretty) — 终端表格
 
 ## 许可证
 
-[MIT](LICENSE)
+[MIT](LICENSE) © 2025 cicbyte
