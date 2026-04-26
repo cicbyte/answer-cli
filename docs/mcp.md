@@ -18,10 +18,13 @@ answer-cli mcp
 |------|------|------|
 | `question_search` | 搜索问题 | `keyword`、`tag`、`order`、`limit` |
 | `question_get` | 获取问题详情 | `question_id` |
+| `question_create` | 创建问题 | `title`、`content`、`tags` |
+| `question_update` | 更新问题 | `question_id`、`title`、`content`、`tags` |
 | `answer_list` | 列出问题的回答 | `question_id`、`limit` |
+| `answer_create` | 创建回答 | `question_id`、`content` |
+| `answer_update` | 更新回答 | `answer_id`、`content` |
+| `comment_add` | 添加评论 | `object_id`、`content` |
 | `tag_search` | 搜索标签 | `query` |
-| `tag_get` | 获取标签详情 | `slug_name` |
-| `user_search` | 搜索用户 | `username` |
 
 ## 客户端配置
 

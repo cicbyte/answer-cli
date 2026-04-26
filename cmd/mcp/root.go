@@ -15,10 +15,13 @@ func GetMcpCommand() *cobra.Command {
 注册的 Tools:
   question_search  搜索问题
   question_get     获取问题详情
+  question_create  创建问题
+  question_update  更新问题
   answer_list      列出问题的回答
-  tag_search       搜索标签
-  tag_get          获取标签详情
-  user_search      搜索用户`,
+  answer_create    创建回答
+  answer_update    更新回答
+  comment_add      添加评论
+  tag_search       搜索标签`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := runMcpServer(); err != nil {
 				fmt.Fprintf(cmd.ErrOrStderr(), "Error: %v\n", err)

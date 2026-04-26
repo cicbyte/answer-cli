@@ -147,7 +147,19 @@ answer-cli config list
 
 ## MCP Server
 
-`answer-cli mcp` runs an MCP Server in stdio mode, registering 6 tools: `question_search`, `question_get`, `answer_list`, `tag_search`, `tag_get`, `user_search`.
+`answer-cli mcp` runs an MCP Server in stdio mode, registering 10 tools:
+
+| Tool | Description |
+|------|-------------|
+| `question_search` | Search questions |
+| `question_get` | Get question detail |
+| `question_create` | Create a question |
+| `question_update` | Update a question |
+| `answer_list` | List answers for a question |
+| `answer_create` | Create an answer |
+| `answer_update` | Update an answer |
+| `comment_add` | Add a comment |
+| `tag_search` | Search tags |
 
 **Claude Desktop:**
 

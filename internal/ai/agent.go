@@ -37,9 +37,13 @@ func (a *Agent) buildSystemPrompt() string {
 
 - question_search：按关键词搜索问题。**此工具会自动获取最相关问题的详情和回答**，你只需调用一次即可获得完整信息
 - question_get：获取问题的完整详情（含正文内容），通常不需要单独调用，question_search 已自动获取
+- question_create：创建新问题
+- question_update：更新已有问题
 - answer_list：获取问题的所有回答，通常不需要单独调用，question_search 已自动获取
+- answer_create：为问题创建回答
+- answer_update：更新已有回答
+- comment_add：为问题或回答添加评论
 - tag_search：搜索标签
-- user_search：搜索用户
 - open_question：在浏览器中打开问题页面（仅当用户明确要求，或回答内容包含图片时使用）
 
 ## 回答策略
@@ -49,6 +53,10 @@ func (a *Agent) buildSystemPrompt() string {
 3. **结构化输出**：使用 Markdown 格式化回答，包括标题、列表、代码块等
 4. **引用来源**：回答时引用问题标题和回答者，方便用户溯源
 5. **追问确认**：如果用户的问题模糊，先搜索可能相关的内容，基于搜索结果给出最可能的回答，然后询问是否需要更多信息
+
+## 写操作
+
+当用户明确要求创建问题、回答或评论时，使用对应的 create/update 工具。不要主动创建内容，除非用户明确要求。
 
 ## 重要
 
@@ -92,6 +100,39 @@ func (a *Agent) getTools() []openai.Tool {
 		{
 			Type: "function",
 			Function: &openai.FunctionDefinition{
+				Name:        "question_create",
+				Description: "Create a new question. Only call when the user explicitly asks to create a question.",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"title":   map[string]any{"type": "string", "description": "Question title"},
+						"content": map[string]any{"type": "string", "description": "Question content in Markdown"},
+						"tags":    map[string]any{"type": "string", "description": "Comma-separated tag slugs"},
+					},
+					"required": []string{"title", "content"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: &openai.FunctionDefinition{
+				Name:        "question_update",
+				Description: "Update an existing question. Only call when the user explicitly asks to update.",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"question_id": map[string]any{"type": "string", "description": "Question ID"},
+						"title":       map[string]any{"type": "string", "description": "New title"},
+						"content":     map[string]any{"type": "string", "description": "New content in Markdown"},
+						"tags":        map[string]any{"type": "string", "description": "Comma-separated tag slugs"},
+					},
+					"required": []string{"question_id"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: &openai.FunctionDefinition{
 				Name:        "answer_list",
 				Description: "List answers for a question (usually not needed, question_search already fetches this)",
 				Parameters: map[string]any{
@@ -107,6 +148,51 @@ func (a *Agent) getTools() []openai.Tool {
 		{
 			Type: "function",
 			Function: &openai.FunctionDefinition{
+				Name:        "answer_create",
+				Description: "Create an answer for a question. Only call when the user explicitly asks to create an answer.",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"question_id": map[string]any{"type": "string", "description": "Question ID"},
+						"content":     map[string]any{"type": "string", "description": "Answer content in Markdown"},
+					},
+					"required": []string{"question_id", "content"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: &openai.FunctionDefinition{
+				Name:        "answer_update",
+				Description: "Update an existing answer. Only call when the user explicitly asks to update.",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"answer_id": map[string]any{"type": "string", "description": "Answer ID"},
+						"content":   map[string]any{"type": "string", "description": "New content in Markdown"},
+					},
+					"required": []string{"answer_id", "content"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: &openai.FunctionDefinition{
+				Name:        "comment_add",
+				Description: "Add a comment to a question or answer. Only call when the user explicitly asks to add a comment.",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"object_id": map[string]any{"type": "string", "description": "Question or Answer ID"},
+						"content":   map[string]any{"type": "string", "description": "Comment content"},
+					},
+					"required": []string{"object_id", "content"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: &openai.FunctionDefinition{
 				Name:        "tag_search",
 				Description: "Search tags by prefix",
 				Parameters: map[string]any{
@@ -115,20 +201,6 @@ func (a *Agent) getTools() []openai.Tool {
 						"query": map[string]any{"type": "string", "description": "Tag name prefix"},
 					},
 					"required": []string{"query"},
-				},
-			},
-		},
-		{
-			Type: "function",
-			Function: &openai.FunctionDefinition{
-				Name:        "user_search",
-				Description: "Search users by username",
-				Parameters: map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"username": map[string]any{"type": "string", "description": "Username to search"},
-					},
-					"required": []string{"username"},
 				},
 			},
 		},
@@ -224,19 +296,103 @@ func (a *Agent) executeTool(ctx context.Context, name string, args string) strin
 		data, _ := json.Marshal(tags)
 		return string(data)
 
-	case "user_search":
+	case "question_create":
 		var params struct {
-			Username string `json:"username"`
+			Title   string `json:"title"`
+			Content string `json:"content"`
+			Tags    string `json:"tags"`
 		}
 		if err := json.Unmarshal([]byte(args), &params); err != nil {
 			return fmt.Sprintf("error: %v", err)
 		}
-		users, err := a.apiClient.User.SearchUsers(ctx, params.Username)
+		var tags []models.TagAddReq
+		if params.Tags != "" {
+			for _, slug := range strings.Split(params.Tags, ",") {
+				slug = strings.TrimSpace(slug)
+				if slug != "" {
+					tags = append(tags, models.TagAddReq{SlugName: slug, DisplayName: slug})
+				}
+			}
+		}
+		q, err := a.apiClient.Question.Add(ctx, &models.QuestionAddReq{
+			Title: params.Title, Content: params.Content, Tags: tags,
+		})
 		if err != nil {
 			return fmt.Sprintf("error: %v", err)
 		}
-		data, _ := json.Marshal(users)
-		return string(data)
+		return fmt.Sprintf("已创建问题 #%s: %s", q.ID, q.Title)
+
+	case "question_update":
+		var params struct {
+			QuestionID string `json:"question_id"`
+			Title      string `json:"title"`
+			Content    string `json:"content"`
+			Tags       string `json:"tags"`
+		}
+		if err := json.Unmarshal([]byte(args), &params); err != nil {
+			return fmt.Sprintf("error: %v", err)
+		}
+		updateReq := models.QuestionUpdateReq{ID: params.QuestionID}
+		if params.Title != "" {
+			updateReq.Title = params.Title
+		}
+		if params.Content != "" {
+			updateReq.Content = params.Content
+		}
+		if params.Tags != "" {
+			updateReq.Tags = strings.Split(params.Tags, ",")
+		}
+		if err := a.apiClient.Question.Update(ctx, &updateReq); err != nil {
+			return fmt.Sprintf("error: %v", err)
+		}
+		return fmt.Sprintf("已更新问题 #%s", params.QuestionID)
+
+	case "answer_create":
+		var params struct {
+			QuestionID string `json:"question_id"`
+			Content    string `json:"content"`
+		}
+		if err := json.Unmarshal([]byte(args), &params); err != nil {
+			return fmt.Sprintf("error: %v", err)
+		}
+		a, err := a.apiClient.Answer.Add(ctx, &models.AnswerAddReq{
+			QuestionID: params.QuestionID, Content: params.Content,
+		})
+		if err != nil {
+			return fmt.Sprintf("error: %v", err)
+		}
+		return fmt.Sprintf("已创建回答 #%s (问题 %s)", a.ID, params.QuestionID)
+
+	case "answer_update":
+		var params struct {
+			AnswerID string `json:"answer_id"`
+			Content  string `json:"content"`
+		}
+		if err := json.Unmarshal([]byte(args), &params); err != nil {
+			return fmt.Sprintf("error: %v", err)
+		}
+		if err := a.apiClient.Answer.Update(ctx, &models.AnswerUpdateReq{
+			ID: params.AnswerID, Content: params.Content,
+		}); err != nil {
+			return fmt.Sprintf("error: %v", err)
+		}
+		return fmt.Sprintf("已更新回答 #%s", params.AnswerID)
+
+	case "comment_add":
+		var params struct {
+			ObjectID string `json:"object_id"`
+			Content  string `json:"content"`
+		}
+		if err := json.Unmarshal([]byte(args), &params); err != nil {
+			return fmt.Sprintf("error: %v", err)
+		}
+		c, err := a.apiClient.Comment.Add(ctx, &models.CommentAddReq{
+			ObjectID: params.ObjectID, OriginalText: params.Content,
+		})
+		if err != nil {
+			return fmt.Sprintf("error: %v", err)
+		}
+		return fmt.Sprintf("已添加评论 #%s (对象 %s)", c.CommentID, params.ObjectID)
 
 	case "open_question":
 		var params struct {
@@ -573,8 +729,16 @@ func toolSummary(name string) string {
 		return "获取回答列表"
 	case "tag_search":
 		return "搜索标签"
-	case "user_search":
-		return "搜索用户"
+	case "question_create":
+		return "已创建问题"
+	case "question_update":
+		return "已更新问题"
+	case "answer_create":
+		return "已创建回答"
+	case "answer_update":
+		return "已更新回答"
+	case "comment_add":
+		return "已添加评论"
 	case "open_question":
 		return "已打开浏览器"
 	default:

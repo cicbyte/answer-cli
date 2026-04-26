@@ -147,7 +147,19 @@ answer-cli config list
 
 ## MCP Server
 
-`answer-cli mcp` 以 stdio 模式运行 MCP Server，注册 6 个工具：`question_search`、`question_get`、`answer_list`、`tag_search`、`tag_get`、`user_search`。
+`answer-cli mcp` 以 stdio 模式运行 MCP Server，注册 10 个工具：
+
+| Tool | 描述 |
+|------|------|
+| `question_search` | 搜索问题 |
+| `question_get` | 获取问题详情 |
+| `question_create` | 创建问题 |
+| `question_update` | 更新问题 |
+| `answer_list` | 列出问题的回答 |
+| `answer_create` | 创建回答 |
+| `answer_update` | 更新回答 |
+| `comment_add` | 添加评论 |
+| `tag_search` | 搜索标签 |
 
 **Claude Desktop：**
 
