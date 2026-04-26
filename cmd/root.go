@@ -76,6 +76,27 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&globalFormat, "format", "table", "输出格式 (table|json|jsonl)")
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		output.SetFormat(globalFormat)
+
+		skipCommands := map[string]bool{"config": true, "auth": true, "mcp": true, "help": true, "completion": true}
+		if skipCommands[cmd.Name()] {
+			return nil
+		}
+		if cmd.HasParent() && skipCommands[cmd.Parent().Name()] {
+			return nil
+		}
+
+		cfg := common.GetAppConfig()
+		if cfg.GetServerURL() == "" || cfg.GetServerToken() == "" {
+			fmt.Fprintln(os.Stderr, "欢迎使用 answer-cli！")
+			if cfg.GetServerURL() == "" {
+				fmt.Fprintln(os.Stderr, "  尚未配置服务器，请先登录：")
+			} else {
+				fmt.Fprintln(os.Stderr, "  尚未登录，请先执行登录：")
+			}
+			fmt.Fprintln(os.Stderr, "  answer-cli auth login")
+			fmt.Fprintln(os.Stderr, "  登录时会交互式引导配置服务器地址、邮箱和密码")
+			os.Exit(1)
+		}
 		return nil
 	}
 }
