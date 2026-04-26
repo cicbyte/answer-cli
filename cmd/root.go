@@ -73,7 +73,7 @@ func init() {
 	rootCmd.AddCommand(mcp.GetMcpCommand())
 	rootCmd.AddCommand(chat.GetChatCommand())
 
-	rootCmd.PersistentFlags().StringVar(&globalFormat, "format", "", "输出格式 (json|jsonl|pretty)")
+	rootCmd.PersistentFlags().StringVar(&globalFormat, "format", "table", "输出格式 (table|json|jsonl)")
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		output.SetFormat(globalFormat)
 		return nil
