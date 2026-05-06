@@ -190,4 +190,4 @@ answer-cli config list
 
 ## 许可证
 
-[MIT](LICENSE) © 2025 cicbyte
+[MIT](LICENSE) © 2026 cicbyte

@@ -190,4 +190,4 @@ answer-cli config list
 
 ## License
 
-[MIT](LICENSE) © 2025 cicbyte
+[MIT](LICENSE) © 2026 cicbyte
